@@ -18,19 +18,21 @@ const mobile = '(max-width: 600px)';
 ---
 
 <figure class="shot">
-  <picture>
-    <source srcset={darkMobile} media={`${mobile} and (prefers-color-scheme: dark)`} type="image/webp" width="780" height="1688" />
-    <source srcset={lightMobile} media={mobile} type="image/webp" width="780" height="1688" />
-    <source srcset={dark} media="(prefers-color-scheme: dark)" type="image/webp" />
-    <img
-      src={light}
-      alt={alt}
-      width="1440"
-      height="900"
-      loading={priority ? 'eager' : 'lazy'}
-      decoding="async"
-      fetchpriority={priority ? 'high' : 'auto'}
-    />
-  </picture>
+  <a class="shot-open" href={light} data-shot data-alt={alt} data-caption={caption ?? alt} data-light={light} data-dark={dark} data-light-mobile={lightMobile} data-dark-mobile={darkMobile}>
+    <picture>
+      <source srcset={darkMobile} media={`${mobile} and (prefers-color-scheme: dark)`} type="image/webp" width="780" height="1688" />
+      <source srcset={lightMobile} media={mobile} type="image/webp" width="780" height="1688" />
+      <source srcset={dark} media="(prefers-color-scheme: dark)" type="image/webp" />
+      <img
+        src={light}
+        alt={alt}
+        width="1440"
+        height="900"
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchpriority={priority ? 'high' : 'auto'}
+      />
+    </picture>
+  </a>
   {caption && <figcaption>{caption}</figcaption>}
 </figure>

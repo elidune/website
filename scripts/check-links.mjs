@@ -36,21 +36,47 @@ function extract(html, pageUrl) {
   return found;
 }
 
-async function checkExternal(url) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 20000);
+/** Blob HTML pages answer 503 from GitHub-hosted runners. The raw file is the existence check. */
+function probeUrl(href) {
+  let url;
   try {
-    const response = await fetch(url, {
-      redirect: 'follow',
-      signal: controller.signal,
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; EliduneLinkCheck/1.0)' },
-    });
-    if (response.status >= 400) failures.push(`${url} -> ${response.status}`);
-  } catch (error) {
-    failures.push(`${url} -> ${error instanceof Error ? error.message : 'error'}`);
-  } finally {
-    clearTimeout(timer);
+    url = new URL(href);
+  } catch {
+    return href;
   }
+  if (url.hostname !== 'github.com') return href;
+  const parts = url.pathname.split('/').filter(Boolean);
+  if (parts.length < 5 || parts[2] !== 'blob') return href;
+  const [owner, repo, , ref, ...rest] = parts;
+  return `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${rest.join('/')}`;
+}
+
+async function checkExternal(url) {
+  const target = probeUrl(url);
+  const attempts = 3;
+  let last = 'error';
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+    try {
+      const response = await fetch(target, {
+        redirect: 'follow',
+        signal: controller.signal,
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; EliduneLinkCheck/1.0)' },
+      });
+      if (response.status < 400) return;
+      last = String(response.status);
+      const retry = response.status === 429 || response.status >= 500;
+      if (!retry) break;
+    } catch (error) {
+      last = error instanceof Error ? error.message : 'error';
+    } finally {
+      clearTimeout(timer);
+    }
+    if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, 1500 * attempt));
+  }
+  const where = target === url ? url : `${url} (${target})`;
+  failures.push(`${where} -> ${last}`);
 }
 
 while (queue.length) {
