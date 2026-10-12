@@ -3,7 +3,7 @@ export const softwareRepoUrl = 'https://github.com/elidune/elidune';
 export const websiteRepoUrl = 'https://github.com/elidune/website';
 export const issuesUrl = 'https://github.com/elidune/elidune/issues';
 export const licenseUrl = 'https://www.gnu.org/licenses/agpl-3.0.html';
-export const dockerGuideUrl = 'https://github.com/elidune/elidune/blob/main/docs/README-docker.md';
+export const dockerGuideUrl = 'https://github.com/elidune/elidune/blob/dev/docs/README-docker.md';
 export const authorName = 'Jean Collonvillé';
 
 export const installYaml = `services:

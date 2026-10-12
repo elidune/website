@@ -1,13 +1,35 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import type { Locale } from '../i18n/locales';
+import type { MessageKey } from '../i18n/ui';
 import { docSlugs, type DocSlug } from '../i18n/routes';
 import { websiteRepoUrl } from './site';
+
+export const docSectionOrder = ['install', 'start', 'features', 'admin', 'help', 'dev'] as const;
+export type DocSection = (typeof docSectionOrder)[number];
+
+export const docSectionLabel: Record<DocSection, MessageKey> = {
+  install: 'docs.section.install',
+  start: 'docs.section.start',
+  features: 'docs.section.features',
+  admin: 'docs.section.admin',
+  help: 'docs.section.help',
+  dev: 'docs.section.dev',
+};
 
 export type DocHit = {
   slug: DocSlug;
   entry: CollectionEntry<'docs'>;
   translated: boolean;
 };
+
+export function groupDocs(docs: DocHit[]): { section: DocSection; docs: DocHit[] }[] {
+  return docSectionOrder
+    .map((section) => ({
+      section,
+      docs: docs.filter((doc) => doc.entry.data.section === section),
+    }))
+    .filter((group) => group.docs.length > 0);
+}
 
 function docId(entry: CollectionEntry<'docs'>): { locale: string; slug: string } {
   const [locale, slug] = entry.id.split('/');

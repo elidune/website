@@ -1,30 +1,52 @@
 ---
-title: Frequently asked questions
-description: "Questions that already have a public answer. Draft: other questions stay open."
-navTitle: Questions
-order: 5
-draft: true
+title: Help and frequently asked questions
+description: Frequent questions on installation, sign-in, loans, and data.
+navTitle: Help and questions
+order: 60
+section: help
+draft: false
 locale: en
 ---
 
-Only answers grounded in the repository or on this site are written. The rest waits for review.
+Startup failures are in [Troubleshooting](/en/docs/troubleshooting/). Bug reports go to the issues of [elidune/elidune](https://github.com/elidune/elidune/issues).
 
-## Is Elidune free software?
+## Installation
 
-Yes. The code is under the [GNU AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html).
+**Is an administrator required at first start?**  
+No. While the database has neither a user nor a saved setting, the UI opens `/first-setup`. No password is shipped.
 
-## Where is the code?
+**Which image?**  
+`elidune-all-in-one` for a single container. `elidune-server` and `elidune-ui` to split the API, the UI, PostgreSQL, Redis, and Meilisearch. Default ports differ. See [Installation](/en/docs/installation/).
 
-In the [elidune/elidune](https://github.com/elidune/elidune) repository.
+**Where is the demo?**  
+The software README gives `https://elidune.b-612.fr/`. This presentation site also points at `https://elidune-demo.b-612.fr`.
 
-## Can I try it without installing?
+## Sign-in
 
-A demonstration is online: [elidune-demo.b-612.fr](https://elidune-demo.b-612.fr).
+**`/login` has no form.**  
+It redirects to `/`.
 
-## Which languages is the software interface aimed at?
+**Forgotten password does nothing.**  
+Without `ELIDUNE_SERVER__PUBLIC_BASE_URL`, the server does not send the message. Past three requests per hour for the same login, the response stays a generic success and no message is sent.
 
-The software announces French, English, German, and Spanish. This presentation site is currently published in French and English.
+**Too many attempts.**  
+Five failures in 15 minutes on the same login block further attempts. This is not a permanent account lock. Staff clear the block on the user record.
 
-## How do I ask a question?
+## Loans and holds
 
-Open an issue on [elidune/elidune](https://github.com/elidune/elidune/issues). This site has no forum and no email address.
+**The loan button is not in the menu.**  
+`/loans` appears only for `librarian` and `admin`. A patron renews in `/my-loans`.
+
+**A hold does not notify immediately.**  
+While the item is still on the shelf (`to_pick`), the patron is not notified. The notification is sent when the status becomes `ready`.
+
+**Renewal is refused before the due date.**  
+The default window is 7 days before the due date. Outside it, the server refuses, unless the loan is already overdue.
+
+## Data
+
+**Does deleting a patron erase statistics?**  
+“Anonymize for stats” removes the identity and keeps non-identifying dimensions on loan archives. See [Administration](/en/docs/administration/).
+
+**Are the screenshots on this site the software?**  
+No. They are placeholders (`public/screens/…`). Real screens will be added later.
