@@ -12,10 +12,15 @@ interface Props {
 const { name, locale, alt, caption, priority = false } = Astro.props;
 const light = `/screens/${locale}/light/${name}.webp`;
 const dark = `/screens/${locale}/dark/${name}.webp`;
+const lightMobile = `/screens/${locale}/light/${name}-mobile.webp`;
+const darkMobile = `/screens/${locale}/dark/${name}-mobile.webp`;
+const mobile = '(max-width: 600px)';
 ---
 
 <figure class="shot">
   <picture>
+    <source srcset={darkMobile} media={`${mobile} and (prefers-color-scheme: dark)`} type="image/webp" width="780" height="1688" />
+    <source srcset={lightMobile} media={mobile} type="image/webp" width="780" height="1688" />
     <source srcset={dark} media="(prefers-color-scheme: dark)" type="image/webp" />
     <img
       src={light}
