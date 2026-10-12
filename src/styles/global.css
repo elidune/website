@@ -418,12 +418,24 @@ footer a:hover { color: var(--accent-text); text-decoration: underline; }
 .prose ul, .prose ol { padding-left: 1.2rem; }
 .prose code { font-size: 0.9em; background: var(--muted-bg); padding: 0.1em 0.35em; border-radius: 0.25rem; }
 .prose pre code { background: none; padding: 0; color: inherit; }
+.prose .astro-code span[style*="#6A737D"],
+.prose .astro-code span[style*="#6a737d"] { color: #d1d5db !important; }
 .prose blockquote { border-left: 4px solid var(--primary); margin: 1rem 0; padding: 0.25rem 1rem; color: var(--text-2); }
 
-.docs-layout { display: grid; grid-template-columns: 15rem 1fr; gap: 2.5rem; align-items: start; }
-.docs-side { position: sticky; top: calc(var(--header-h) + 1rem); }
+.docs-layout { display: grid; grid-template-columns: 16.5rem 1fr; gap: 2.5rem; align-items: start; }
+.docs-side {
+  position: sticky;
+  top: calc(var(--header-h) + 1rem);
+  max-height: calc(100vh - var(--header-h) - 2rem);
+  overflow: auto;
+}
 .docs-side h2 { font-size: 0.8125rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-text); }
-.docs-side ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.15rem; }
+.docs-side h3 { font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-3); margin: 0.9rem 0 0.2rem; }
+.docs-side ol { list-style: none; margin: 0 0 0.35rem; padding: 0; display: flex; flex-direction: column; gap: 0.15rem; }
+.prose .todo { border-left-color: var(--accent-text); background: var(--accent-soft); }
+.prose figure { margin: 1.25rem 0; }
+.prose figure img { border: 1px solid var(--border); border-radius: var(--r-lg); }
+.prose figcaption { font-size: 0.875rem; color: var(--text-3); margin-top: 0.4rem; }
 .docs-side a { display: block; text-decoration: none; color: var(--text-2); padding: 0.35rem 0.5rem; border-radius: var(--r-lg); font-size: 0.875rem; }
 .docs-side a:hover { background: var(--muted-bg); color: var(--text); }
 .docs-side a[aria-current='page'] { color: var(--text); background: var(--accent-soft); }

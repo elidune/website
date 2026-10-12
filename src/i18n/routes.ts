@@ -4,8 +4,22 @@ export const docSlugs = [
   'installation',
   'getting-started',
   'features',
+  'catalogue',
+  'copies',
+  'patrons',
+  'circulation',
+  'holds',
+  'reminders-fines',
+  'acquisitions',
+  'weeding',
+  'opac',
+  'statistics',
+  'sites',
+  'languages',
   'administration',
   'faq',
+  'troubleshooting',
+  'developers',
 ] as const;
 
 export type DocSlug = (typeof docSlugs)[number];

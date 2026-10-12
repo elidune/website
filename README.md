@@ -51,11 +51,11 @@ Les chemins (`/de/funktionen/`, etc.) sont déjà dans `src/i18n/routes.ts`.
 
 Les guides sont une collection de contenu : `src/content/docs/<langue>/<slug>.md`.
 
-Slugs stables : `installation`, `getting-started`, `features`, `administration`, `faq`.
+Le sommaire suit le champ `section` du frontmatter (`install`, `start`, `features`, `admin`, `help`, `dev`) et l’ordre de `docSlugs` dans `src/i18n/routes.ts`.
 
 Si le fichier manque dans la langue demandée, la page française est affichée avec un bandeau « non traduit ». Le lien « Traduire cette page » ouvre la création du fichier sur GitHub. « Modifier cette page » pointe vers le fichier existant.
 
-Les pages actuelles sont des brouillons : elles annoncent le plan, elles ne décrivent pas de procédure qui n’est pas déjà dans le dépôt du logiciel.
+Le contenu décrit le dépôt [elidune/elidune](https://github.com/elidune/elidune), branche `dev`. Une zone **TODO** signale un point que le code ne tranche pas.
 
 ### Captures d’écran
 

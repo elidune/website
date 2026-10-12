@@ -1,30 +1,52 @@
 ---
-title: Questions fréquentes
-description: "Questions dont la réponse est déjà publique. Brouillon : les autres questions restent ouvertes."
-navTitle: Questions
-order: 5
-draft: true
+title: Aide et questions fréquentes
+description: Questions fréquentes sur l’installation, la connexion, les prêts et les données.
+navTitle: Aide et questions
+order: 60
+section: help
+draft: false
 locale: fr
 ---
 
-Seules les réponses appuyées sur le dépôt ou sur ce site sont écrites. Le reste attend une relecture.
+Les pannes de démarrage sont dans [Dépannage](/fr/documentation/troubleshooting/). Le signalement de bug se fait sur les issues de [elidune/elidune](https://github.com/elidune/elidune/issues).
 
-## Elidune est-il libre ?
+## Installation
 
-Oui. Le code est sous [GNU AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html).
+**Faut-il un administrateur au premier lancement ?**  
+Non. Tant que la base n’a ni usager ni réglage enregistré, l’interface ouvre `/first-setup`. Il n’y a pas de mot de passe livré.
 
-## Où est le code ?
+**Quelle image choisir ?**  
+`elidune-all-in-one` pour un seul conteneur. `elidune-server` et `elidune-ui` pour séparer l’API, l’interface, PostgreSQL, Redis et Meilisearch. Les ports par défaut ne sont pas les mêmes. Voir [Installation](/fr/documentation/installation/).
 
-Dans le dépôt [elidune/elidune](https://github.com/elidune/elidune).
+**Où est la démo ?**  
+Le README du logiciel indique `https://elidune.b-612.fr/`. Ce site de présentation pointe aussi vers `https://elidune-demo.b-612.fr`.
 
-## Peut-on l'essayer sans l'installer ?
+## Connexion
 
-Une démonstration est en ligne : [elidune-demo.b-612.fr](https://elidune-demo.b-612.fr).
+**La page `/login` est vide de formulaire.**  
+Elle redirige vers `/`.
 
-## Quelles langues vise l'interface du logiciel ?
+**Le mot de passe oublié ne donne rien.**  
+Sans `ELIDUNE_SERVER__PUBLIC_BASE_URL`, le serveur n’envoie pas le message. Au-delà de trois demandes par heure pour le même identifiant, la réponse reste un succès générique et aucun message ne part.
 
-Le logiciel annonce le français, l'anglais, l'allemand et l'espagnol. Ce site de présentation est pour l'instant publié en français et en anglais.
+**Trop d’essais.**  
+Cinq échecs en 15 minutes sur le même identifiant bloquent les essais suivants. Ce n’est pas un verrouillage définitif du compte. Le personnel lève le blocage sur la fiche usager.
 
-## Comment poser une question ?
+## Prêts et réservations
 
-Ouvrez une issue sur [elidune/elidune](https://github.com/elidune/elidune/issues). Ce site ne fournit ni forum ni adresse e-mail.
+**Le bouton de prêt n’est pas dans le menu.**  
+`/loans` n’apparaît que pour `librarian` et `admin`. Un lecteur prolonge dans `/my-loans`.
+
+**Une réservation ne prévient pas tout de suite.**  
+Tant que l’exemplaire est encore en rayon (`to_pick`), le lecteur n’est pas notifié. La notification part quand le statut devient `ready`.
+
+**Le renouvellement est refusé avant l’échéance.**  
+La fenêtre par défaut est de 7 jours avant la date de retour. En dehors, le serveur refuse, sauf si le prêt est déjà en retard.
+
+## Données
+
+**Supprimer un lecteur efface-t-il les statistiques ?**  
+L’action « Anonymiser pour les stats » retire l’identité et garde des dimensions non nominatives sur les archives de prêts. Voir [Administration](/fr/documentation/administration/).
+
+**Les captures d’écran de ce site sont-elles le logiciel ?**  
+Non. Ce sont des emplacements (`public/screens/…`). Les écrans réels seront ajoutés plus tard.

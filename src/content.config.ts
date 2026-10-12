@@ -9,6 +9,7 @@ const docs = defineCollection({
     description: z.string(),
     navTitle: z.string(),
     order: z.number(),
+    section: z.enum(['install', 'start', 'features', 'admin', 'help', 'dev']),
     draft: z.boolean().default(true),
     locale: z.enum(['fr', 'en', 'de', 'es']),
   }),

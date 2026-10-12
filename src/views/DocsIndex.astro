@@ -5,14 +5,14 @@ import Search from '../components/Search.astro';
 import type { Locale } from '../i18n/locales';
 import { pathFor } from '../i18n/routes';
 import { t } from '../i18n/ui';
-import { listDocs } from '../lib/docs';
+import { docSectionLabel, groupDocs, listDocs } from '../lib/docs';
 
 interface Props {
   locale: Locale;
 }
 
 const { locale } = Astro.props;
-const docs = await listDocs(locale);
+const groups = groupDocs(await listDocs(locale));
 ---
 
 <BaseLayout
@@ -30,15 +30,20 @@ const docs = await listDocs(locale);
       <Search locale={locale} />
       <DocsCards locale={locale} level={2} />
       <h2 style="margin-top:2.5rem">{t(locale, 'docs.all')}</h2>
-      <ol>
-        {
-          docs.map((doc) => (
-            <li>
-              <a href={pathFor(locale, 'doc', doc.slug)}>{doc.entry.data.navTitle}</a>
-            </li>
-          ))
-        }
-      </ol>
+      {
+        groups.map((group) => (
+          <section>
+            <h3>{t(locale, docSectionLabel[group.section])}</h3>
+            <ol>
+              {group.docs.map((doc) => (
+                <li>
+                  <a href={pathFor(locale, 'doc', doc.slug)}>{doc.entry.data.title}</a>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ))
+      }
     </div>
   </section>
 </BaseLayout>
