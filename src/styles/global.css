@@ -256,6 +256,10 @@ h1 em { font-style: normal; color: var(--accent-text); }
   background: var(--surface);
 }
 
+@media (max-width: 600px) {
+  .shot picture { max-width: 20rem; margin-inline: auto; }
+}
+
 .shot figcaption { font-size: 0.875rem; color: var(--text-2); margin-top: 0.6rem; }
 .hero-shot { margin-top: 3rem; }
 
