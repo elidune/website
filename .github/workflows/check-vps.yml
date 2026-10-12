@@ -1,0 +1,16 @@
+name: Vérification accès VPS
+on: workflow_dispatch
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test SSH
+        env:
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER: ${{ secrets.DEPLOY_USER }}
+          PORT: ${{ vars.DEPLOY_PORT || '22' }}
+        run: |
+          install -m 600 /dev/null ~/key && printf '%s\n' "$KEY" > ~/key
+          ssh -i ~/key -p "$PORT" -o StrictHostKeyChecking=accept-new -o BatchMode=yes "$USER@$HOST" \
+            'whoami; pwd; ls -la; df -h . | tail -1; command -v rsync || echo "rsync ABSENT"; grep -rhE "^\s*(root|server_name|listen)" /etc/nginx/sites-enabled 2>/dev/null | sort -u'
