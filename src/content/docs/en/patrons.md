@@ -32,9 +32,9 @@ Password: 8 characters minimum. `validate_password_strength` applies no other co
 
 The public type (child, adult, school, staff, senior, or a type added in Settings) carries age, subscription length, price, and optionally loan caps that differ from the global rule.
 
-The record has a subscription end date, or none (no end date). Renew stores a new date. The seeded price stored for `adult` is the integer `1500`.
+The record has a subscription end date, or none (no end date). Renew stores a new date. The seeded price stored for `adult` is the integer `1500`, that is 15.00 €.
 
-> **TODO.** The unit of `subscription_price` (cents or whole units) is not named in the migrations read for this page. Do not convert 1500 into a currency until the code or the UI states it.
+`subscription_price` is an integer in cents (`1500` = 15.00 €). The public-type screen takes and shows euros: the label is “Subscription price (€)”, display divides the stored value by 100, and save multiplies the entered amount by 100. An API call or an `INSERT` into `public_types.subscription_price` must send cents (`1500` for 15.00 €).
 
 Public type `child` cannot be enrolled without a legal guardian (`user_guardians`). The picker is on the patron record.
 

@@ -32,9 +32,9 @@ Mot de passe : 8 caractères au minimum. Aucune autre règle de complexité n’
 
 Le type de public (enfant, adulte, scolaire, personnel, senior, ou un type ajouté dans Paramètres) porte l’âge, la durée d’abonnement, le tarif et, en option, des plafonds de prêt différents de la règle globale.
 
-La fiche a une date de fin d’abonnement, ou aucune (abonnement sans date de fin). Le bouton Renouveler enregistre une nouvelle date. Le tarif stocké au départ pour `adult` est l’entier `1500`.
+La fiche a une date de fin d’abonnement, ou aucune (abonnement sans date de fin). Le bouton Renouveler enregistre une nouvelle date. Le tarif stocké au départ pour `adult` est l’entier `1500`, soit 15,00 €.
 
-> **TODO.** L’unité de `subscription_price` (centimes ou unité entière) n’est pas nommée dans les migrations parcourues. Ne pas convertir 1500 en monnaie tant que ce point n’est pas écrit dans le code ou l’interface.
+`subscription_price` est un entier en centimes (`1500` = 15,00 €). L’écran des types de public saisit et affiche des euros : le libellé est « Prix d'abonnement (€) », l’affichage divise la valeur stockée par 100, et l’enregistrement multiplie le montant saisi par 100. Un appel API ou un `INSERT` dans `public_types.subscription_price` doit envoyer les centimes (`1500` pour 15,00 €).
 
 Un type de public `child` ne peut pas être inscrit sans responsable légal (`user_guardians`). Le sélecteur est sur la fiche.
 

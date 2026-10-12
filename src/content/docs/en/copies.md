@@ -37,8 +37,14 @@ The public catalogue shows neither the weeding reason nor the hold patron’s na
 
 ## Inventory
 
-`/inventory` (staff) opens an inventory session. The scope can target a source. Routes under `/api/v1/inventory` require a `librarian` or `admin` account.
+`/inventory` is limited to staff (`librarian` or `admin`). Routes live under `/api/v1/inventory`.
 
-During inventory, an open loan can be closed. An `inventory_loan_closed` email template exists in French and English for that case.
+A session has two statuses (`InventoryStatus`): `open`, labelled “Open”, and `closed`, labelled “Closed”. The “Consolidated” badge follows `consolidated_at`. The enumeration contains only those two values.
 
-> **TODO.** Describe the exact session flow (create, scan, close) from `InventoryPage.tsx` and `server/src/api/inventory.rs`, screen by screen. This page does not do that yet.
+Scope is set at creation: an optional source (`scope_source_id`) and an optional place code (`scope_place`). It is not edited afterwards. With both empty, counts cover active, non-archived copies. The “Location hint” field (`locationFilter`) stays display text. The server does not filter copies with that text.
+
+1. Create a named session. Source and place code are optional.
+2. While the session is `open`, record each copy by barcode, or import a list. The server rejects more than 500 codes per request (`INVENTORY_BATCH_MAX_BARCODES`). The UI splits longer lists.
+3. Each scan gets a result: `found` (“Active”, in scope), `found_out_of_scope` (“Out of scope”), `found_archived` (“Archived”), `unknown_barcode` (“Unknown”). The same code can be read more than once. The report counts those extra reads as duplicates. The missing list is the active in-scope copies absent from the session log.
+4. Closing sets the session to `closed`. A closed session rejects any new scan. The discrepancy report covers expected in-scope counts, out-of-scope hits, archived hits, unknown codes, and duplicates.
+5. After closing, consolidation archives the missing in-scope copies. A biblio with no active copy left is archived. With `force` false, copies on an active loan are skipped and the session is not marked consolidated, so staff can retry with `force` true. With `force` true, those loans are closed. The affected patrons receive the `inventory_loan_closed` template, in French or English according to the account language (see [Languages](/en/docs/languages/)).
