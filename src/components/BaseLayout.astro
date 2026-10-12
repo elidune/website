@@ -5,6 +5,7 @@ import { alternatesForUrl, pathFor, type PageKind } from '../i18n/routes';
 import { isUiComplete, t } from '../i18n/ui';
 import Footer from './Footer.astro';
 import Header from './Header.astro';
+import ShotLightbox from './ShotLightbox.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -107,5 +108,6 @@ const json = jsonLd
       <slot />
     </main>
     <Footer locale={locale} />
+    <ShotLightbox locale={locale} />
   </body>
 </html>
