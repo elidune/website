@@ -40,4 +40,6 @@ The amount is `rate × max(0, overdue days − grace)`, then capped when a maxim
 
 `circulation_settings.unpaid_fine_threshold` defaults to 0. An unpaid balance **strictly above** the threshold blocks checkout and renewal. With 0, any positive balance blocks. Paid or waived fines do not count. Staff can force the loan. The threshold is edited on the loan-rules tab, and a public type can carry an override.
 
-> **TODO.** The currency shown next to amounts is not set in `sample.toml` or in the fines migration. The UI speaks of “the library’s currency” without a currency-code field found for this page.
+`daily_rate`, `max_amount`, `amount`, `paid_amount`, and `unpaid_fine_threshold` are `NUMERIC(12, 2)`. The UI shows them with two decimal places (`moneyAmountToInput`) and does not divide them by 100. The threshold hint says “Amount in the library currency”.
+
+> **TODO.** The currency code for fines is still undetermined: neither `sample.toml`, nor the fines migrations, nor a settings field stores an ISO code. Acquisition lines do carry a three-letter ISO code (`EUR` by default).

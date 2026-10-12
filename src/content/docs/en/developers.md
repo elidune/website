@@ -36,7 +36,13 @@ cargo run -- --config config/default.toml
 
 The sample connection string is `postgres://elidune:elidune@localhost:5432/elidune`. Redis: `redis://127.0.0.1:6379`. Pending migrations run at startup.
 
-> **TODO.** The README names `--config config/default.toml`, and that file is in `.gitignore`. The repository does not describe copying from `sample.toml`. Do that locally before the first `cargo run`.
+Before that first start, copy the versioned sample to the gitignored file. `.gitignore` lists `**/config/default.toml`. From `server/`:
+
+```bash
+cp config/sample.toml config/default.toml
+```
+
+From the repository root: `cp server/config/sample.toml server/config/default.toml`. The [README](https://github.com/elidune/elidune/blob/dev/README.md) then gives the `cargo run` command above. File keys are in [`server/README.md`](https://github.com/elidune/elidune/blob/dev/server/README.md). The same step is noted in [Installation](/en/docs/installation/).
 
 UI (Node, pnpm only, `ui/pnpm-lock.yaml`):
 
@@ -87,9 +93,9 @@ pnpm build
 
 ## Contributing
 
-Pull requests target `main` or `dev`, because CI listens on both branches. An API change and the matching UI change ship in the same set of commits. Server code and comments are in English. Visible UI strings go through `t('key')`.
+Contributions are proposed as pull requests into `dev`. The maintainer squash-merges them. `main` receives published releases (the image tag `:latest` follows a push to `main`, see above). This squash practice is the maintainer’s. It is not written in `AGENTS.md` or in the workflows. CI still listens on `main` and `dev`.
 
-> **TODO.** The repository does not say whether a merge must be a squash. Nothing in `AGENTS.md` or in the workflows requires that method.
+An API change and the matching UI change ship in the same set of commits. Server code and comments are in English. Visible UI strings go through `t('key')`.
 
 ## UI translations
 

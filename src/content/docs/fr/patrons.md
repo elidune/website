@@ -34,7 +34,7 @@ Le type de public (enfant, adulte, scolaire, personnel, senior, ou un type ajout
 
 La fiche a une date de fin d’abonnement, ou aucune (abonnement sans date de fin). Le bouton Renouveler enregistre une nouvelle date. Le tarif stocké au départ pour `adult` est l’entier `1500`.
 
-> **TODO.** L’unité de `subscription_price` (centimes ou unité entière) n’est pas nommée dans les migrations parcourues. Ne pas convertir 1500 en monnaie tant que ce point n’est pas écrit dans le code ou l’interface.
+`subscription_price` est un entier en centimes. Le modèle serveur le commente ainsi : « Subscription price in cents (e.g. 1500 = 15.00€) ». L’écran des types de public divise la valeur par 100 pour l’affichage (`toFixed(2)` suivi du signe €) et, à l’enregistrement, multiplie le montant saisi par 100 (`emptyToNullPriceCents`). Le libellé du champ est « Prix d'abonnement (€) ». La valeur de départ `1500` s’affiche donc `15.00€`. Ce signe € est écrit dans l’interface. Aucun champ de code devise ne convertit ce tarif.
 
 Un type de public `child` ne peut pas être inscrit sans responsable légal (`user_guardians`). Le sélecteur est sur la fiche.
 

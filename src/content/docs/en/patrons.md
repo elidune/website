@@ -34,7 +34,7 @@ The public type (child, adult, school, staff, senior, or a type added in Setting
 
 The record has a subscription end date, or none (no end date). Renew stores a new date. The seeded price stored for `adult` is the integer `1500`.
 
-> **TODO.** The unit of `subscription_price` (cents or whole units) is not named in the migrations read for this page. Do not convert 1500 into a currency until the code or the UI states it.
+`subscription_price` is an integer in cents. The server model comments it as “Subscription price in cents (e.g. 1500 = 15.00€)”. The public-type screen divides the value by 100 for display (`toFixed(2)` followed by a euro sign) and, on save, multiplies the entered amount by 100 (`emptyToNullPriceCents`). The field label is “Subscription price (€)”. The seeded value `1500` therefore displays as `15.00€`. That euro sign is written in the interface. No currency-code field converts this price.
 
 Public type `child` cannot be enrolled without a legal guardian (`user_guardians`). The picker is on the patron record.
 

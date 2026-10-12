@@ -40,4 +40,6 @@ Le montant est `tarif × max(0, jours de retard − grâce)`, puis plafonné si 
 
 `circulation_settings.unpaid_fine_threshold` vaut 0 par défaut. Un solde impayé **strictement supérieur** au seuil bloque le prêt et la prolongation. Avec 0, tout solde positif bloque. Les amendes payées ou annulées ne comptent pas. Le personnel peut forcer le prêt. Le seuil se règle sur l’onglet des emprunts, et un type de public peut porter une dérogation.
 
-> **TODO.** La devise affichée à côté des montants n’est pas fixée dans `sample.toml` ni dans la migration des amendes. L’interface parle de « la devise de la bibliothèque » sans champ de code devise repéré ici.
+`daily_rate`, `max_amount`, `amount`, `paid_amount` et `unpaid_fine_threshold` sont des `NUMERIC(12, 2)`. L’interface les affiche avec deux décimales (`moneyAmountToInput`) et ne les divise pas par 100. L’aide du seuil dit « Montant dans la devise de la bibliothèque ».
+
+> **TODO.** Le code de devise des amendes reste indéterminé : ni `sample.toml`, ni les migrations d’amendes, ni un champ de paramètres ne stockent de code ISO. Les lignes d’acquisition, elles, portent un code ISO de trois lettres (`EUR` par défaut).

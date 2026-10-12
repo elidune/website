@@ -36,7 +36,13 @@ cargo run -- --config config/default.toml
 
 La chaîne par défaut du modèle est `postgres://elidune:elidune@localhost:5432/elidune`. Redis : `redis://127.0.0.1:6379`. Au démarrage, les migrations en attente s’appliquent.
 
-> **TODO.** Le README indique `--config config/default.toml`, et ce fichier est dans `.gitignore`. Le dépôt ne décrit pas la copie depuis `sample.toml`. La faire localement avant le premier `cargo run`.
+Avant ce premier lancement, copier le modèle versionné vers le fichier ignoré par Git. `.gitignore` contient `**/config/default.toml`. Depuis `server/` :
+
+```bash
+cp config/sample.toml config/default.toml
+```
+
+Depuis la racine du dépôt : `cp server/config/sample.toml server/config/default.toml`. Le [README](https://github.com/elidune/elidune/blob/dev/README.md) donne ensuite la commande `cargo run` ci-dessus. Les clés du fichier sont dans [`server/README.md`](https://github.com/elidune/elidune/blob/dev/server/README.md). Le même geste est rappelé dans [Installation](/fr/documentation/installation/).
 
 Interface (Node, pnpm uniquement, `ui/pnpm-lock.yaml`) :
 
@@ -87,9 +93,9 @@ pnpm build
 
 ## Contribuer
 
-Les pull requests visent `main` ou `dev`, puisque la CI écoute ces deux branches. Une modification d’API et d’interface se livre dans le même jeu de commits. Les commentaires et le code du serveur sont en anglais. Les chaînes visibles de l’interface passent par `t('clé')`.
+Les contributions se proposent en pull request vers `dev`. Le mainteneur les fusionne par squash. `main` reçoit les versions publiées (l’étiquette d’image `:latest` suit une poussée vers `main`, voir ci-dessus). Cette pratique de squash est celle du mainteneur. Elle n’est pas écrite dans `AGENTS.md` ni dans les workflows. La CI continue d’écouter `main` et `dev`.
 
-> **TODO.** Le dépôt ne dit pas si le merge doit être un squash. Rien dans `AGENTS.md` ni dans les workflows n’impose cette méthode.
+Une modification d’API et d’interface se livre dans le même jeu de commits. Les commentaires et le code du serveur sont en anglais. Les chaînes visibles de l’interface passent par `t('clé')`.
 
 ## Traductions de l’interface
 

@@ -10,6 +10,16 @@ locale: fr
 
 Ce guide reprend les fichiers `docker/` et `docs/README-docker.md` de [elidune/elidune](https://github.com/elidune/elidune) (branche `dev`). Le détail des variables reste dans [`docker/.env.example`](https://github.com/elidune/elidune/blob/dev/docker/.env.example) et [`server/config/sample.toml`](https://github.com/elidune/elidune/blob/dev/server/config/sample.toml).
 
+## Lancement local sans Docker
+
+Avant le premier `cargo run`, copier le modèle versionné vers le fichier ignoré par Git :
+
+```bash
+cp server/config/sample.toml server/config/default.toml
+```
+
+`.gitignore` contient `**/config/default.toml`. Depuis le répertoire `server/`, la même copie est `cp config/sample.toml config/default.toml`. Le [README du logiciel](https://github.com/elidune/elidune/blob/dev/README.md) lance ensuite l’API avec `cd server` puis `cargo run -- --config config/default.toml`. Les clés du fichier sont décrites dans [`server/README.md`](https://github.com/elidune/elidune/blob/dev/server/README.md). Tests et CI : [Développeurs](/fr/documentation/developers/).
+
 ## Prérequis
 
 - Docker 20.10 ou plus récent, et Docker Compose v2 (`docker compose`).
