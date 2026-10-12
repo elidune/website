@@ -37,20 +37,29 @@ function extract(html, pageUrl) {
 }
 
 async function checkExternal(url) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 20000);
-  try {
-    const response = await fetch(url, {
-      redirect: 'follow',
-      signal: controller.signal,
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; EliduneLinkCheck/1.0)' },
-    });
-    if (response.status >= 400) failures.push(`${url} -> ${response.status}`);
-  } catch (error) {
-    failures.push(`${url} -> ${error instanceof Error ? error.message : 'error'}`);
-  } finally {
-    clearTimeout(timer);
+  const attempts = 3;
+  let last = 'error';
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+    try {
+      const response = await fetch(url, {
+        redirect: 'follow',
+        signal: controller.signal,
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; EliduneLinkCheck/1.0)' },
+      });
+      if (response.status < 400) return;
+      last = String(response.status);
+      const retry = response.status === 429 || response.status >= 500;
+      if (!retry) break;
+    } catch (error) {
+      last = error instanceof Error ? error.message : 'error';
+    } finally {
+      clearTimeout(timer);
+    }
+    if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, 1500 * attempt));
   }
+  failures.push(`${url} -> ${last}`);
 }
 
 while (queue.length) {
