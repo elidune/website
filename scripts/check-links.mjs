@@ -36,14 +36,30 @@ function extract(html, pageUrl) {
   return found;
 }
 
+/** Blob HTML pages answer 503 from GitHub-hosted runners. The raw file is the existence check. */
+function probeUrl(href) {
+  let url;
+  try {
+    url = new URL(href);
+  } catch {
+    return href;
+  }
+  if (url.hostname !== 'github.com') return href;
+  const parts = url.pathname.split('/').filter(Boolean);
+  if (parts.length < 5 || parts[2] !== 'blob') return href;
+  const [owner, repo, , ref, ...rest] = parts;
+  return `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${rest.join('/')}`;
+}
+
 async function checkExternal(url) {
+  const target = probeUrl(url);
   const attempts = 3;
   let last = 'error';
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 20000);
     try {
-      const response = await fetch(url, {
+      const response = await fetch(target, {
         redirect: 'follow',
         signal: controller.signal,
         headers: { 'User-Agent': 'Mozilla/5.0 (compatible; EliduneLinkCheck/1.0)' },
@@ -59,7 +75,8 @@ async function checkExternal(url) {
     }
     if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, 1500 * attempt));
   }
-  failures.push(`${url} -> ${last}`);
+  const where = target === url ? url : `${url} (${target})`;
+  failures.push(`${where} -> ${last}`);
 }
 
 while (queue.length) {
