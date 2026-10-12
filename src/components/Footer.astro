@@ -1,0 +1,54 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo.png';
+import type { Locale } from '../i18n/locales';
+import { pathFor } from '../i18n/routes';
+import { t } from '../i18n/ui';
+import { issuesUrl, licenseUrl, softwareRepoUrl } from '../lib/site';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const home = pathFor(locale, 'home');
+const year = String(new Date().getFullYear());
+---
+
+<footer data-pagefind-ignore>
+  <div class="wrap">
+    <div>
+      <a class="brand" href={home}>
+        <Image src={logo} alt="" width={36} height={36} densities={[1, 2]} />
+        Elidune
+      </a>
+      <p>{t(locale, 'footer.tagline')}</p>
+    </div>
+    <div>
+      <h2>{t(locale, 'footer.project')}</h2>
+      <a href={`${home}#projet`}>{t(locale, 'footer.why')}</a>
+      <a href={pathFor(locale, 'features')}>{t(locale, 'nav.features')}</a>
+      <a href={`${home}#installer`}>{t(locale, 'footer.install')}</a>
+      <a href={pathFor(locale, 'changelog')}>{t(locale, 'footer.changelog')}</a>
+    </div>
+    <div>
+      <h2>{t(locale, 'footer.docs')}</h2>
+      <a href={pathFor(locale, 'doc', 'installation')}>{t(locale, 'docs.card.install.title')}</a>
+      <a href={pathFor(locale, 'doc', 'features')}>{t(locale, 'docs.card.daily.title')}</a>
+      <a href={pathFor(locale, 'doc', 'faq')}>{t(locale, 'docs.card.faq.title')}</a>
+    </div>
+    <div>
+      <h2>{t(locale, 'footer.community')}</h2>
+      <a href={softwareRepoUrl}>{t(locale, 'nav.github')}</a>
+      <a href={issuesUrl}>{t(locale, 'footer.issues')}</a>
+      <a href={pathFor(locale, 'contribute')}>{t(locale, 'nav.contribute')}</a>
+    </div>
+    <p class="legal">
+      {t(locale, 'footer.copy', { year })}
+      {' · '}
+      <a href={licenseUrl}>GNU AGPL-3.0</a>
+      {' · '}
+      <a href={pathFor(locale, 'legal')}>{t(locale, 'footer.legalLink')}</a>
+    </p>
+  </div>
+</footer>

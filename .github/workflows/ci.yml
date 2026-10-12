@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: node scripts/check-html.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 5
+
+  links:
+    name: Link check
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - run: npm ci
+      - run: node scripts/check-links.mjs
+
+  axe:
+    name: Accessibility
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/a11y.mjs
+
+  deploy:
+    name: Deploy
+    needs: [build, links, axe]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Rsync dist contents to the VPS
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          DEST="/var/www/elidune/public/"
+          case "$DEST" in
+            /var/www/elidune/public/) ;;
+            *) echo "Refusing to deploy outside /var/www/elidune/public/" >&2; exit 1 ;;
+          esac
+          install -m 700 -d ~/.ssh
+          KEY="$HOME/.ssh/deploy_key"
+          install -m 600 /dev/null "$KEY"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$KEY"
+          rsync -az --delete \
+            -e "ssh -i $KEY -p 22 -o StrictHostKeyChecking=accept-new -o BatchMode=yes" \
+            dist/ "${DEPLOY_USER}@${DEPLOY_HOST}:${DEST}"

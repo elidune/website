@@ -1,0 +1,93 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+import ContributeBlock from '../components/ContributeBlock.astro';
+import DocsCards from '../components/DocsCards.astro';
+import FeatureGrid from '../components/FeatureGrid.astro';
+import FeatureTour from '../components/FeatureTour.astro';
+import InstallBlock from '../components/InstallBlock.astro';
+import Screenshot from '../components/Screenshot.astro';
+import WhyBlock from '../components/WhyBlock.astro';
+import type { Locale } from '../i18n/locales';
+import { pathFor } from '../i18n/routes';
+import { t } from '../i18n/ui';
+import { demoUrl } from '../lib/site';
+
+interface Props {
+  locale: Locale;
+  mirror?: boolean;
+}
+
+const { locale, mirror = false } = Astro.props;
+---
+
+<BaseLayout
+  locale={locale}
+  kind="home"
+  title={t(locale, 'meta.home.title')}
+  description={t(locale, 'meta.home.description')}
+  jsonLd={true}
+  noindex={mirror}
+  canonicalPath={mirror ? pathFor('fr', 'home') : undefined}
+  mirror={mirror}
+>
+  {
+    mirror && (
+      <div class="wrap" style="padding-top:1.25rem">
+        <p class="banner">
+          {t('fr', 'root.hint')}{' '}
+          <a href={pathFor('en', 'home')} hreflang="en" lang="en">{t('fr', 'root.hintLink')}</a>
+        </p>
+      </div>
+    )
+  }
+  <div class="hero">
+    <div class="wrap">
+      <div class="intro">
+        <p class="pill">{t(locale, 'home.pill')}</p>
+        <h1>
+          {t(locale, 'home.h1.before')} <em>{t(locale, 'home.h1.em')}</em> {t(locale, 'home.h1.after')}
+        </h1>
+        <p class="lead">{t(locale, 'home.lead')}</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="#installer">{t(locale, 'home.ctaInstall')}</a>
+          <a class="btn btn-ghost" href={demoUrl}>{t(locale, 'home.ctaDemo')}</a>
+          <a class="btn btn-ghost" href={pathFor(locale, 'contribute')}>{t(locale, 'home.ctaContribute')}</a>
+        </div>
+        <p class="facts">
+          <span>{t(locale, 'home.fact1')}</span>
+          <span>{t(locale, 'home.fact2')}</span>
+          <span>{t(locale, 'home.fact3')}</span>
+        </p>
+      </div>
+      <div class="hero-shot">
+        <Screenshot
+          name="desk"
+          locale={locale}
+          alt={t(locale, 'shot.desk.alt')}
+          caption={t(locale, 'shot.desk.caption')}
+          priority={true}
+        />
+      </div>
+    </div>
+  </div>
+  <WhyBlock locale={locale} />
+  <section id="fonctions">
+    <div class="wrap">
+      <p class="kicker">{t(locale, 'features.kicker')}</p>
+      <h2>{t(locale, 'features.title')}</h2>
+      <p class="sub">{t(locale, 'features.sub')}</p>
+      <FeatureGrid locale={locale} />
+      <FeatureTour locale={locale} />
+    </div>
+  </section>
+  <InstallBlock locale={locale} />
+  <section id="docs">
+    <div class="wrap">
+      <p class="kicker">{t(locale, 'docs.kicker')}</p>
+      <h2>{t(locale, 'docs.title')}</h2>
+      <p class="sub">{t(locale, 'docs.sub')}</p>
+      <DocsCards locale={locale} />
+    </div>
+  </section>
+  <ContributeBlock locale={locale} />
+</BaseLayout>

@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+import DocsCards from '../components/DocsCards.astro';
+import Search from '../components/Search.astro';
+import type { Locale } from '../i18n/locales';
+import { pathFor } from '../i18n/routes';
+import { t } from '../i18n/ui';
+import { listDocs } from '../lib/docs';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const docs = await listDocs(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  kind="docs-index"
+  title={t(locale, 'meta.docs.title')}
+  description={t(locale, 'meta.docs.description')}
+  indexable={true}
+>
+  <section>
+    <div class="wrap" data-pagefind-body data-pagefind-filter={`locale:${locale}`} data-pagefind-meta={`title:${t(locale, 'meta.docs.title')}`}>
+      <p class="kicker">{t(locale, 'docs.kicker')}</p>
+      <h1>{t(locale, 'docs.title')}</h1>
+      <p class="sub">{t(locale, 'docs.sub')}</p>
+      <Search locale={locale} />
+      <DocsCards locale={locale} level={2} />
+      <h2 style="margin-top:2.5rem">{t(locale, 'docs.all')}</h2>
+      <ol>
+        {
+          docs.map((doc) => (
+            <li>
+              <a href={pathFor(locale, 'doc', doc.slug)}>{doc.entry.data.navTitle}</a>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+</BaseLayout>

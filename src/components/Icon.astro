@@ -1,0 +1,12 @@
+---
+import { icons, type IconName } from './icons';
+
+interface Props {
+  name: IconName;
+  bare?: boolean;
+}
+
+const { name, bare = false } = Astro.props;
+---
+
+<span class={bare ? 'ic-bare' : 'ic'} aria-hidden="true" set:html={icons[name]} />

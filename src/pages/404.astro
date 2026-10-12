@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+import { pathFor } from '../i18n/routes';
+import { t } from '../i18n/ui';
+---
+
+<BaseLayout
+  locale="fr"
+  kind="home"
+  title={`${t('fr', 'meta.notFound.title')} · Elidune`}
+  description={t('fr', 'meta.notFound.description')}
+  noindex={true}
+  canonicalPath="/404.html"
+>
+  <section>
+    <div class="wrap">
+      <h1>{t('fr', 'notFound.title')}</h1>
+      <p class="sub">{t('fr', 'notFound.body')}</p>
+      <div class="cta">
+        <a class="btn btn-primary" href={pathFor('fr', 'home')}>{t('fr', 'notFound.fr')}</a>
+        <a class="btn btn-ghost" href={pathFor('en', 'home')} hreflang="en" lang="en">{t('fr', 'notFound.en')}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,34 @@
+{
+  "name": "elidune-website",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Presentation website for Elidune, a free library management system.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build && pagefind --site dist",
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "check": "ASTRO_TELEMETRY_DISABLED=1 astro check",
+    "placeholders": "node scripts/placeholders.mjs",
+    "a11y": "node scripts/a11y.mjs",
+    "links": "node scripts/check-links.mjs"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.2",
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource-variable/inter": "^5.3.0",
+    "astro": "^7.3.8",
+    "marked": "^18.1.0",
+    "pagefind": "^1.5.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "playwright": "^1.64.0",
+    "sharp": "^0.35.5",
+    "typescript": "~5.9.3"
+  }
+}

@@ -1,0 +1,23 @@
+---
+import { enabledLocales, isEnabledLocale } from '../../i18n/locales';
+import { contentPaths, type PageKind } from '../../i18n/routes';
+import Page from '../../views/Page.astro';
+
+export function getStaticPaths() {
+  return enabledLocales.flatMap((lang) =>
+    contentPaths(lang).map((item) => ({
+      params: { lang, slug: item.slug },
+      props: { kind: item.kind, docSlug: item.docSlug },
+    })),
+  );
+}
+
+const { lang } = Astro.params;
+if (!isEnabledLocale(lang)) {
+  throw new Error(`Unsupported locale: ${lang}`);
+}
+
+const { kind, docSlug } = Astro.props as { kind: Exclude<PageKind, 'home'>; docSlug?: string };
+---
+
+<Page locale={lang} kind={kind} docSlug={docSlug} />

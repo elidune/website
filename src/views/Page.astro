@@ -1,0 +1,25 @@
+---
+import type { Locale } from '../i18n/locales';
+import type { PageKind } from '../i18n/routes';
+import Changelog from './Changelog.astro';
+import Contribute from './Contribute.astro';
+import DocPage from './DocPage.astro';
+import DocsIndex from './DocsIndex.astro';
+import Features from './Features.astro';
+import Legal from './Legal.astro';
+
+interface Props {
+  locale: Locale;
+  kind: Exclude<PageKind, 'home'>;
+  docSlug?: string;
+}
+
+const { locale, kind, docSlug } = Astro.props;
+---
+
+{kind === 'features' && <Features locale={locale} />}
+{kind === 'docs-index' && <DocsIndex locale={locale} />}
+{kind === 'doc' && docSlug && <DocPage locale={locale} slug={docSlug} />}
+{kind === 'contribute' && <Contribute locale={locale} />}
+{kind === 'changelog' && <Changelog locale={locale} />}
+{kind === 'legal' && <Legal locale={locale} />}

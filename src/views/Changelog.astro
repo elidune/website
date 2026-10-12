@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+import { formatDate, formatNumber } from '../i18n/format';
+import type { Locale } from '../i18n/locales';
+import { t } from '../i18n/ui';
+import { fetchReleases } from '../lib/releases';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const feed = await fetchReleases();
+const count = formatNumber(feed.releases.length, locale);
+const countLabel = t(locale, feed.releases.length === 1 ? 'changelog.count' : 'changelog.countPlural', { count });
+---
+
+<BaseLayout
+  locale={locale}
+  kind="changelog"
+  title={t(locale, 'meta.changelog.title')}
+  description={t(locale, 'meta.changelog.description')}
+>
+  <section>
+    <div class="wrap">
+      <h1>{t(locale, 'meta.changelog.title')}</h1>
+      <p class="sub">{t(locale, 'changelog.lead')}</p>
+      {
+        feed.ok && feed.releases.length > 0 && (
+          <p>{countLabel}</p>
+        )
+      }
+      {
+        !feed.ok && (
+          <p class="banner" role="status">{t(locale, 'changelog.unavailable')}</p>
+        )
+      }
+      {
+        feed.ok && feed.releases.length === 0 && (
+          <p class="banner" role="status">{t(locale, 'changelog.empty')}</p>
+        )
+      }
+      {
+        feed.releases.map((release) => (
+          <article class="release">
+            <h2>
+              <a href={release.url}>{release.name}</a>
+              {release.prerelease && <span class="badge">{t(locale, 'changelog.prerelease')}</span>}
+            </h2>
+            {release.publishedAt && (
+              <p class="release-meta">
+                <time datetime={release.publishedAt}>{t(locale, 'changelog.published', { date: formatDate(release.publishedAt, locale) })}</time>
+              </p>
+            )}
+            {release.html && <div class="prose" set:html={release.html} />}
+          </article>
+        ))
+      }
+      <p style="margin-top:1.5rem">
+        <a href="https://github.com/elidune/elidune/releases">{t(locale, 'changelog.github')}</a>
+      </p>
+    </div>
+  </section>
+</BaseLayout>

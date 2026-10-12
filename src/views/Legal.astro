@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../components/BaseLayout.astro';
+import type { Locale } from '../i18n/locales';
+import { t, type MessageKey } from '../i18n/ui';
+import { demoUrl, licenseUrl, softwareRepoUrl, websiteRepoUrl } from '../lib/site';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const sections: { title: MessageKey; body: MessageKey; href?: string }[] = [
+  { title: 'legal.editorTitle', body: 'legal.editorBody', href: softwareRepoUrl },
+  { title: 'legal.siteTitle', body: 'legal.siteBody', href: websiteRepoUrl },
+  { title: 'legal.contactTitle', body: 'legal.contactBody', href: `${softwareRepoUrl}/issues` },
+  { title: 'legal.hostTitle', body: 'legal.hostBody' },
+  { title: 'legal.privacyTitle', body: 'legal.privacyBody' },
+  { title: 'legal.demoTitle', body: 'legal.demoBody', href: demoUrl },
+  { title: 'legal.imagesTitle', body: 'legal.imagesBody' },
+  { title: 'legal.ipTitle', body: 'legal.ipBody', href: licenseUrl },
+];
+---
+
+<BaseLayout
+  locale={locale}
+  kind="legal"
+  title={t(locale, 'meta.legal.title')}
+  description={t(locale, 'meta.legal.description')}
+>
+  <section>
+    <div class="wrap prose">
+      <h1>{t(locale, 'meta.legal.title')}</h1>
+      <p>{t(locale, 'legal.lead')}</p>
+      {
+        sections.map((section) => (
+          <section>
+            <h2>{t(locale, section.title)}</h2>
+            <p>
+              {t(locale, section.body)}
+              {section.href && (
+                <>
+                  {' '}
+                  <a href={section.href}>{section.href}</a>
+                </>
+              )}
+            </p>
+          </section>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>
