@@ -40,6 +40,4 @@ The amount is `rate × max(0, overdue days − grace)`, then capped when a maxim
 
 `circulation_settings.unpaid_fine_threshold` defaults to 0. An unpaid balance **strictly above** the threshold blocks checkout and renewal. With 0, any positive balance blocks. Paid or waived fines do not count. Staff can force the loan. The threshold is edited on the loan-rules tab, and a public type can carry an override.
 
-`daily_rate`, `max_amount`, `amount`, `paid_amount`, and `unpaid_fine_threshold` are `NUMERIC(12, 2)`. The UI shows them with two decimal places (`moneyAmountToInput`) and does not divide them by 100. The threshold hint says “Amount in the library currency”.
-
-> **TODO.** The currency code for fines is still undetermined: neither `sample.toml`, nor the fines migrations, nor a settings field stores an ISO code. Acquisition lines do carry a three-letter ISO code (`EUR` by default).
+Fine amounts are euros. The UI takes and shows them in euros, with two decimal places. `daily_rate`, `max_amount`, `amount`, `paid_amount`, and `unpaid_fine_threshold` are `NUMERIC(12, 2)` values carrying that amount: `15.00` means 15.00 €. The shipped rule is a daily rate of `0.20` and a cap of `15.00`. The screen sends the entered value to the API unchanged (`PUT /api/v1/fines/policy`, field `unpaidFineThreshold`). An API call or an `INSERT` therefore sends euros (`15.00` for 15.00 €). The subscription price is described in [Patrons](/en/docs/patrons/).

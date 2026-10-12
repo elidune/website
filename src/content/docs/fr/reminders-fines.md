@@ -40,6 +40,4 @@ Le montant est `tarif × max(0, jours de retard − grâce)`, puis plafonné si 
 
 `circulation_settings.unpaid_fine_threshold` vaut 0 par défaut. Un solde impayé **strictement supérieur** au seuil bloque le prêt et la prolongation. Avec 0, tout solde positif bloque. Les amendes payées ou annulées ne comptent pas. Le personnel peut forcer le prêt. Le seuil se règle sur l’onglet des emprunts, et un type de public peut porter une dérogation.
 
-`daily_rate`, `max_amount`, `amount`, `paid_amount` et `unpaid_fine_threshold` sont des `NUMERIC(12, 2)`. L’interface les affiche avec deux décimales (`moneyAmountToInput`) et ne les divise pas par 100. L’aide du seuil dit « Montant dans la devise de la bibliothèque ».
-
-> **TODO.** Le code de devise des amendes reste indéterminé : ni `sample.toml`, ni les migrations d’amendes, ni un champ de paramètres ne stockent de code ISO. Les lignes d’acquisition, elles, portent un code ISO de trois lettres (`EUR` par défaut).
+Les montants d’amende sont des euros. L’interface les saisit et les affiche en euros, avec deux décimales. `daily_rate`, `max_amount`, `amount`, `paid_amount` et `unpaid_fine_threshold` sont des `NUMERIC(12, 2)` qui portent ce montant : `15.00` signifie 15,00 €. La règle livrée est un tarif journalier de `0.20` et un plafond de `15.00`. L’écran renvoie à l’API la valeur saisie telle quelle (`PUT /api/v1/fines/policy`, champ `unpaidFineThreshold`). Un appel API ou un `INSERT` envoie donc les euros (`15.00` pour 15,00 €). Le tarif d’abonnement est décrit dans [Lecteurs](/fr/documentation/patrons/).
