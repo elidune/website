@@ -1,0 +1,90 @@
+---
+import type { Locale } from '../i18n/locales';
+import { t } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const messages = {
+  unavailable: t(locale, 'search.unavailable'),
+  none: t(locale, 'search.none'),
+  status: t(locale, 'search.status', { count: '{count}' }),
+  statusPlural: t(locale, 'search.statusPlural', { count: '{count}' }),
+};
+---
+
+<div class="search" data-pagefind-ignore>
+  <label for="doc-search">{t(locale, 'search.label')}</label>
+  <input
+    id="doc-search"
+    type="search"
+    name="q"
+    placeholder={t(locale, 'search.placeholder')}
+    autocomplete="off"
+    enterkeyhint="search"
+  />
+  <p id="doc-search-status" class="search-status" aria-live="polite"></p>
+  <ul id="doc-search-results" class="search-results"></ul>
+  <noscript><p>{t(locale, 'search.noscript')}</p></noscript>
+</div>
+
+<script is:inline define:vars={{ locale, messages }}>
+  const input = document.getElementById('doc-search');
+  const status = document.getElementById('doc-search-status');
+  const list = document.getElementById('doc-search-results');
+  let pagefind;
+  let timer;
+
+  function safeExcerpt(html) {
+    return String(html).replace(/<(?!\/?mark\b)[^>]*>/gi, '');
+  }
+
+  async function ensure() {
+    if (!pagefind) pagefind = await import('/pagefind/pagefind.js');
+    return pagefind;
+  }
+
+  async function run() {
+    const query = input.value.trim();
+    list.replaceChildren();
+    if (query.length < 2) {
+      status.textContent = '';
+      return;
+    }
+    try {
+      const pf = await ensure();
+      const search = await pf.search(query, { filters: { locale: [locale] } });
+      const results = search.results ?? [];
+      const count = new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-GB').format(results.length);
+      const template = results.length === 1 ? messages.status : messages.statusPlural;
+      status.textContent = template.replace('{count}', count);
+      if (results.length === 0) {
+        status.textContent = messages.none;
+        return;
+      }
+      for (const result of results.slice(0, 8)) {
+        const data = await result.data();
+        const item = document.createElement('li');
+        const link = document.createElement('a');
+        link.className = 'card';
+        link.href = data.url;
+        const title = document.createElement('strong');
+        title.textContent = data.meta?.title || data.url;
+        const excerpt = document.createElement('p');
+        excerpt.innerHTML = safeExcerpt(data.excerpt || '');
+        link.append(title, excerpt);
+        item.append(link);
+        list.append(item);
+      }
+    } catch {
+      status.textContent = messages.unavailable;
+    }
+  }
+
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(run, 200);
+  });
+</script>

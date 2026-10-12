@@ -1,0 +1,66 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../components/BaseLayout.astro';
+import Search from '../components/Search.astro';
+import type { Locale } from '../i18n/locales';
+import { pathFor } from '../i18n/routes';
+import { t } from '../i18n/ui';
+import { editDocUrl, listDocs } from '../lib/docs';
+
+interface Props {
+  locale: Locale;
+  slug: string;
+}
+
+const { locale, slug } = Astro.props;
+const docs = await listDocs(locale);
+const current = docs.find((doc) => doc.slug === slug);
+if (!current) {
+  throw new Error(`Missing documentation page: ${locale}/${slug}`);
+}
+const { Content } = await render(current.entry);
+const editUrl = editDocUrl(locale, slug, current.translated);
+---
+
+<BaseLayout
+  locale={locale}
+  kind="doc"
+  docSlug={slug}
+  title={current.entry.data.title}
+  description={current.entry.data.description}
+  indexable={true}
+>
+  <section>
+    <div class="wrap docs-layout">
+      <aside class="docs-side" data-pagefind-ignore>
+        <h2>{t(locale, 'docs.sidebar')}</h2>
+        <nav aria-label={t(locale, 'docs.sidebar')}>
+          <ol>
+            {
+              docs.map((doc) => (
+                <li>
+                  <a href={pathFor(locale, 'doc', doc.slug)} aria-current={doc.slug === slug ? 'page' : undefined}>
+                    {doc.entry.data.navTitle}
+                  </a>
+                </li>
+              ))
+            }
+          </ol>
+        </nav>
+      </aside>
+      <div>
+        <Search locale={locale} />
+        {current.entry.data.draft && <p class="banner" role="status">{t(locale, 'docs.draft')}</p>}
+        {!current.translated && <p class="banner" role="status">{t(locale, 'docs.untranslated')}</p>}
+        <article class="prose" data-pagefind-body data-pagefind-filter={`locale:${locale}`} data-pagefind-meta={`title:${current.entry.data.title.replaceAll('"', '')}`}>
+          <h1>{current.entry.data.title}</h1>
+          <Content />
+        </article>
+        <p style="margin-top:2rem">
+          <a href={editUrl}>{current.translated ? t(locale, 'docs.edit') : t(locale, 'docs.editMissing')}</a>
+          <span class="sr-only">. {t(locale, 'docs.editHint')}</span>
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

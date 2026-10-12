@@ -1,0 +1,111 @@
+---
+import type { Locale } from '../i18n/locales';
+import { enabledLocales, localeMeta } from '../i18n/locales';
+import { alternatesForUrl, pathFor, type PageKind } from '../i18n/routes';
+import { isUiComplete, t } from '../i18n/ui';
+import Footer from './Footer.astro';
+import Header from './Header.astro';
+import '../styles/global.css';
+
+interface Props {
+  locale: Locale;
+  kind: PageKind;
+  title: string;
+  description: string;
+  docSlug?: string;
+  jsonLd?: boolean;
+  indexable?: boolean;
+  noindex?: boolean;
+  canonicalPath?: string;
+  mirror?: boolean;
+}
+
+const {
+  locale,
+  kind,
+  title,
+  description,
+  docSlug,
+  jsonLd = false,
+  indexable = false,
+  noindex = false,
+  canonicalPath,
+  mirror = false,
+} = Astro.props;
+
+const site = Astro.site ?? new URL('https://elidune.fr');
+const path = canonicalPath ?? pathFor(locale, kind, docSlug);
+const canonical = new URL(path, site).href;
+const ogImage = new URL(`/og/${locale}.png`, site).href;
+const alternates = alternatesForUrl(new URL(pathFor(locale, kind, docSlug), site).href);
+const pageTitle = kind === 'home' ? title : `${title} · Elidune`;
+const uiFallback = !isUiComplete(locale);
+const otherLocales = enabledLocales.filter((code) => code !== locale);
+
+const json = jsonLd
+  ? JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'Elidune',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Docker',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+      isAccessibleForFree: true,
+      license: 'https://www.gnu.org/licenses/agpl-3.0.html',
+      codeRepository: 'https://github.com/elidune/elidune',
+      url: new URL(pathFor('fr', 'home'), site).href,
+      description: t('fr', 'meta.home.description'),
+      inLanguage: ['fr', 'en', 'de', 'es'],
+      author: { '@type': 'Person', name: 'Jean Collonvillé' },
+      softwareHelp: { '@type': 'WebPage', url: new URL(pathFor(locale, 'docs-index'), site).href },
+    }).replace(/</g, '\\u003c')
+  : '';
+---
+
+<!doctype html>
+<html lang={localeMeta[locale].htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f9fafb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#030712" media="(prefers-color-scheme: dark)" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    {noindex && <meta name="robots" content="noindex" />}
+    {alternates.map((alt) => <link rel="alternate" hreflang={alt.lang} href={alt.url} />)}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Elidune" />
+    <meta property="og:locale" content={localeMeta[locale].og} />
+    {otherLocales.map((code) => <meta property="og:locale:alternate" content={localeMeta[code].og} />)}
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    {jsonLd && <script type="application/ld+json" set:html={json} />}
+  </head>
+  <body {...(indexable ? {} : { 'data-pagefind-ignore': 'all' })}>
+    <a class="skip" href="#content">{t(locale, 'skip')}</a>
+    <Header locale={locale} kind={kind} docSlug={docSlug} active={!mirror} />
+    <main id="content">
+      {
+        uiFallback && (
+          <div class="wrap" style="padding-top:1rem">
+            <p class="banner" role="status">{t(locale, 'ui.fallback')}</p>
+          </div>
+        )
+      }
+      <slot />
+    </main>
+    <Footer locale={locale} />
+  </body>
+</html>

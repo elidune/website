@@ -1,0 +1,63 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo.png';
+import { enabledLocales, localeMeta, type Locale } from '../i18n/locales';
+import { pathFor, type PageKind } from '../i18n/routes';
+import { t } from '../i18n/ui';
+import { demoUrl, softwareRepoUrl } from '../lib/site';
+
+interface Props {
+  locale: Locale;
+  kind: PageKind;
+  docSlug?: string;
+  active?: boolean;
+}
+
+const { locale, kind, docSlug, active = true } = Astro.props;
+const home = pathFor(locale, 'home');
+const docsCurrent = kind === 'docs-index' || kind === 'doc';
+---
+
+<header class="top" data-pagefind-ignore>
+  <div class="wrap">
+    <a class="brand" href={home}>
+      <Image src={logo} alt="" width={36} height={36} densities={[1, 2]} loading="eager" />
+      Elidune
+    </a>
+    <div class="header-tools">
+      <nav aria-label={t(locale, 'lang.nav')}>
+        <ul class="lang">
+          {
+            enabledLocales.map((code) => (
+              <li>
+                <a
+                  href={pathFor(code, kind, docSlug)}
+                  hreflang={localeMeta[code].htmlLang}
+                  lang={localeMeta[code].htmlLang}
+                  aria-current={active && code === locale ? 'true' : undefined}
+                >
+                  <span aria-hidden="true">{localeMeta[code].short}</span>
+                  <span class="sr-only">{localeMeta[code].label}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      <a class="btn btn-ghost header-demo" href={demoUrl}>{t(locale, 'nav.demo')}</a>
+      <a class="btn btn-ghost header-github" href={softwareRepoUrl}>{t(locale, 'nav.github')}</a>
+    </div>
+    <input id="nav-toggle" class="nav-toggle-input" type="checkbox" />
+    <label class="nav-toggle" for="nav-toggle">{t(locale, 'nav.menu')}</label>
+    <nav class="main" id="site-nav" aria-label={t(locale, 'nav.primary')}>
+      <a href={`${home}#projet`}>{t(locale, 'nav.project')}</a>
+      <a href={pathFor(locale, 'features')} aria-current={kind === 'features' ? 'page' : undefined}>{t(locale, 'nav.features')}</a>
+      <a href={pathFor(locale, 'docs-index')} aria-current={docsCurrent ? 'page' : undefined}>{t(locale, 'nav.docs')}</a>
+      <a href={pathFor(locale, 'contribute')} aria-current={kind === 'contribute' ? 'page' : undefined}>{t(locale, 'nav.contribute')}</a>
+      <div class="nav-extra">
+        <a class="btn btn-ghost" href={demoUrl}>{t(locale, 'nav.demo')}</a>
+        <a class="btn btn-ghost" href={softwareRepoUrl}>{t(locale, 'nav.github')}</a>
+      </div>
+    </nav>
+  </div>
+</header>

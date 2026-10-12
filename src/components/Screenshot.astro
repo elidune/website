@@ -1,0 +1,31 @@
+---
+import type { Locale } from '../i18n/locales';
+
+interface Props {
+  name: 'desk' | 'record' | 'catalogue' | 'holds' | 'settings' | 'opac-loans';
+  locale: Locale;
+  alt: string;
+  caption?: string;
+  priority?: boolean;
+}
+
+const { name, locale, alt, caption, priority = false } = Astro.props;
+const light = `/screens/${locale}/light/${name}.webp`;
+const dark = `/screens/${locale}/dark/${name}.webp`;
+---
+
+<figure class="shot">
+  <picture>
+    <source srcset={dark} media="(prefers-color-scheme: dark)" type="image/webp" />
+    <img
+      src={light}
+      alt={alt}
+      width="1440"
+      height="900"
+      loading={priority ? 'eager' : 'lazy'}
+      decoding="async"
+      fetchpriority={priority ? 'high' : 'auto'}
+    />
+  </picture>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

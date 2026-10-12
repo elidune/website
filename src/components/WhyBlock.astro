@@ -1,0 +1,36 @@
+---
+import type { Locale } from '../i18n/locales';
+import { t } from '../i18n/ui';
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const cards: { icon: IconName; title: 'project.card1.title' | 'project.card2.title' | 'project.card3.title'; body: 'project.card1.body' | 'project.card2.body' | 'project.card3.body' }[] = [
+  { icon: 'users', title: 'project.card1.title', body: 'project.card1.body' },
+  { icon: 'box', title: 'project.card2.title', body: 'project.card2.body' },
+  { icon: 'leaf', title: 'project.card3.title', body: 'project.card3.body' },
+];
+---
+
+<section id="projet">
+  <div class="wrap">
+    <p class="kicker">{t(locale, 'project.kicker')}</p>
+    <h2>{t(locale, 'project.title')}</h2>
+    <p class="sub">{t(locale, 'project.sub')}</p>
+    <div class="grid g3">
+      {
+        cards.map((card) => (
+          <article class="card feat">
+            <Icon name={card.icon} />
+            <h3>{t(locale, card.title)}</h3>
+            <p>{t(locale, card.body)}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

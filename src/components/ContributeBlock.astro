@@ -1,0 +1,51 @@
+---
+import type { Locale } from '../i18n/locales';
+import { t } from '../i18n/ui';
+import { issuesUrl, softwareRepoUrl } from '../lib/site';
+
+interface Props {
+  locale: Locale;
+  heading?: 'h2' | 'h1';
+}
+
+const { locale, heading = 'h2' } = Astro.props;
+const tags = ['Rust', 'Axum', 'sqlx', 'PostgreSQL', 'Redis', 'Meilisearch', 'React', 'TypeScript', 'Tailwind', 'Docker'];
+---
+
+<section id="contribuer">
+  <div class="wrap">
+    <p class="kicker">{t(locale, 'contrib.kicker')}</p>
+    {heading === 'h1' ? <h1>{t(locale, 'contrib.title')}</h1> : <h2>{t(locale, 'contrib.title')}</h2>}
+    <p class="sub">{t(locale, 'contrib.sub')}</p>
+    <div class="grid g2">
+      <article class="card pad">
+        <h3>{t(locale, 'contrib.arch.title')}</h3>
+        <p style="color:var(--text-2);font-size:0.875rem">{t(locale, 'contrib.arch.body')}</p>
+        <ul class="tags">
+          {tags.map((tag) => <li class="tag">{tag}</li>)}
+        </ul>
+        <div class="arch">
+          <b>{t(locale, 'contrib.flow1')}</b>
+          <span aria-hidden="true">→</span>
+          <b>{t(locale, 'contrib.flow2')}</b>
+          <span aria-hidden="true">→</span>
+          <b>{t(locale, 'contrib.flow3')}</b>
+        </div>
+        <p style="color:var(--text-2);font-size:0.875rem;margin:0">{t(locale, 'contrib.ci')}</p>
+      </article>
+      <article class="card pad">
+        <h3>{t(locale, 'contrib.pr.title')}</h3>
+        <ol class="contrib">
+          <li>{t(locale, 'contrib.step1')}</li>
+          <li>{t(locale, 'contrib.step2')}</li>
+          <li>{t(locale, 'contrib.step3')}</li>
+          <li>{t(locale, 'contrib.step4')}</li>
+        </ol>
+        <div class="cta" style="margin-top:1.1rem">
+          <a class="btn btn-primary" href={issuesUrl}>{t(locale, 'contrib.issues')}</a>
+          <a class="btn btn-ghost" href={softwareRepoUrl}>{t(locale, 'contrib.source')}</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>

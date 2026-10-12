@@ -1,0 +1,15 @@
+---
+import { enabledLocales, isEnabledLocale } from '../../i18n/locales';
+import Home from '../../views/Home.astro';
+
+export function getStaticPaths() {
+  return enabledLocales.map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+if (!isEnabledLocale(lang)) {
+  throw new Error(`Unsupported locale: ${lang}`);
+}
+---
+
+<Home locale={lang} />

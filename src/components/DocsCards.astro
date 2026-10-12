@@ -1,0 +1,34 @@
+---
+import type { Locale } from '../i18n/locales';
+import { pathFor } from '../i18n/routes';
+import { t } from '../i18n/ui';
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+
+interface Props {
+  locale: Locale;
+  level?: 2 | 3;
+}
+
+const { locale, level = 3 } = Astro.props;
+const Title = level === 2 ? 'h2' : 'h3';
+const cards: { icon: IconName; href: string; title: 'docs.card.install.title' | 'docs.card.daily.title' | 'docs.card.admin.title' | 'docs.card.faq.title'; body: 'docs.card.install.body' | 'docs.card.daily.body' | 'docs.card.admin.body' | 'docs.card.faq.body' }[] = [
+  { icon: 'wrench', href: pathFor(locale, 'doc', 'installation'), title: 'docs.card.install.title', body: 'docs.card.install.body' },
+  { icon: 'levels', href: pathFor(locale, 'doc', 'features'), title: 'docs.card.daily.title', body: 'docs.card.daily.body' },
+  { icon: 'settings', href: pathFor(locale, 'doc', 'administration'), title: 'docs.card.admin.title', body: 'docs.card.admin.body' },
+  { icon: 'message', href: pathFor(locale, 'doc', 'faq'), title: 'docs.card.faq.title', body: 'docs.card.faq.body' },
+];
+---
+
+<div class="grid g4">
+  {
+    cards.map((card) => (
+      <a class="card doc" href={card.href}>
+        <Icon name={card.icon} />
+        <Title>{t(locale, card.title)}</Title>
+        <p>{t(locale, card.body)}</p>
+        <span class="more">{t(locale, 'docs.read')} <Icon name="chevron" bare /></span>
+      </a>
+    ))
+  }
+</div>

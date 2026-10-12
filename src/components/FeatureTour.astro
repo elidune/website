@@ -1,0 +1,35 @@
+---
+import type { Locale } from '../i18n/locales';
+import { t, type MessageKey } from '../i18n/ui';
+import Screenshot from './Screenshot.astro';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const rows: { name: 'record' | 'holds' | 'opac-loans'; kicker: MessageKey; title: MessageKey; body: MessageKey; alt: MessageKey; caption: MessageKey }[] = [
+  { name: 'record', kicker: 'tour.record.kicker', title: 'tour.record.title', body: 'tour.record.body', alt: 'shot.record.alt', caption: 'shot.record.caption' },
+  { name: 'holds', kicker: 'tour.holds.kicker', title: 'tour.holds.title', body: 'tour.holds.body', alt: 'shot.holds.alt', caption: 'shot.holds.caption' },
+  { name: 'opac-loans', kicker: 'tour.opac.kicker', title: 'tour.opac.title', body: 'tour.opac.body', alt: 'shot.opac.alt', caption: 'shot.opac.caption' },
+];
+---
+
+<div class="tour">
+  {
+    rows.map((row) => (
+      <div class="tour-row">
+        <div class="txt">
+          <p class="kicker">{t(locale, row.kicker)}</p>
+          <h3>{t(locale, row.title)}</h3>
+          <p>{t(locale, row.body)}</p>
+        </div>
+        <Screenshot name={row.name} locale={locale} alt={t(locale, row.alt)} caption={t(locale, row.caption)} />
+      </div>
+    ))
+  }
+</div>
+<div class="duo">
+  <Screenshot name="catalogue" locale={locale} alt={t(locale, 'shot.catalogue.alt')} caption={t(locale, 'shot.catalogue.caption')} />
+  <Screenshot name="settings" locale={locale} alt={t(locale, 'shot.settings.alt')} caption={t(locale, 'shot.settings.caption')} />
+</div>

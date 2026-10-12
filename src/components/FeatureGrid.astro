@@ -1,0 +1,35 @@
+---
+import type { Locale } from '../i18n/locales';
+import { t, type MessageKey } from '../i18n/ui';
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+
+interface Props {
+  locale: Locale;
+  heading?: boolean;
+}
+
+const { locale, heading = true } = Astro.props;
+const items: { icon: IconName; title: MessageKey; body: MessageKey }[] = [
+  { icon: 'swap', title: 'feat.loans.title', body: 'feat.loans.body' },
+  { icon: 'bookmark', title: 'feat.holds.title', body: 'feat.holds.body' },
+  { icon: 'book', title: 'feat.catalog.title', body: 'feat.catalog.body' },
+  { icon: 'cart', title: 'feat.acq.title', body: 'feat.acq.body' },
+  { icon: 'mail', title: 'feat.reminders.title', body: 'feat.reminders.body' },
+  { icon: 'user', title: 'feat.opac.title', body: 'feat.opac.body' },
+  { icon: 'calendar', title: 'feat.events.title', body: 'feat.events.body' },
+  { icon: 'clipboard', title: 'feat.inventory.title', body: 'feat.inventory.body' },
+];
+---
+
+<div class="grid g4">
+  {
+    items.map((item) => (
+      <article class="card feat">
+        <Icon name={item.icon} />
+        {heading ? <h3>{t(locale, item.title)}</h3> : <h2>{t(locale, item.title)}</h2>}
+        <p>{t(locale, item.body)}</p>
+      </article>
+    ))
+  }
+</div>
