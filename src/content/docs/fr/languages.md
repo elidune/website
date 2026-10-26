@@ -26,6 +26,16 @@ Seules les quatre premières langues parlées ont une interface traduite. Les au
 
 ## Modèles d’e-mail
 
-Les fichiers livrés existent en `.french.json` et `.english.json` : relances, réservation prête, réinitialisation de mot de passe, code de second facteur, code de secours, annonce d’événement, prêt clos par inventaire. L’onglet Modèles d’e-mails édite ces textes.
+Les fichiers livrés existent en `.french.json` et `.english.json` : relances, réservation prête, réinitialisation de mot de passe, code de second facteur, code de secours, annonce d’événement, prêt clos par inventaire. L’onglet Modèles d’e-mails édite ces textes. Les langues empaquetées sont `english` et `french` (`SUPPORTED_LANGUAGES`).
 
-> **TODO.** Le critère qui choisit le fichier `.french` ou `.english` au moment de l’envoi (langue du compte, langue de l’interface, repli) n’a pas été vérifié dans le service d’e-mail pour cette page.
+À l’envoi, le serveur lit la langue du compte destinataire (`users.language`), pas la langue affichée dans l’interface. Les relances, l’e-mail de réservation prête, l’annonce d’événement, le prêt clos par inventaire, la réinitialisation de mot de passe et le code de second facteur passent cette valeur à `language_chain` (`server/src/email_templates.rs`).
+
+La chaîne de résolution :
+
+| Langue du compte | Ordre des modèles |
+| --- | --- |
+| `english` | `english`, puis `french` |
+| `french` | `french`, puis `english` |
+| absente (`NULL`), `unknown`, ou toute autre valeur (`german`, `spanish`, `italian`, …) | `french`, puis `english` |
+
+Pour chaque langue de la chaîne, une ligne déjà enregistrée en base est essayée d’abord, puis le fichier `{id}.{langue}.json`. La colonne `users.language` est `VARCHAR(32) DEFAULT 'french'` et reste nullable. Un compte qui a gardé cette valeur par défaut est déjà en `french`. Une préférence absente, stockée `NULL`, suit la même chaîne français puis anglais.

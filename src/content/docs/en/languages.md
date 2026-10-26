@@ -26,6 +26,16 @@ Only the four spoken languages above have a translated interface. The others rem
 
 ## Email templates
 
-Shipped files exist as `.french.json` and `.english.json`: reminders, hold ready, password reset, second-factor code, recovery code, event announcement, loan closed by inventory. The Email templates tab edits those texts.
+Shipped files exist as `.french.json` and `.english.json`: reminders, hold ready, password reset, second-factor code, recovery code, event announcement, loan closed by inventory. The Email templates tab edits those texts. Packaged languages are `english` and `french` (`SUPPORTED_LANGUAGES`).
 
-> **TODO.** The rule that picks the `.french` or `.english` file at send time (account language, interface language, fallback) was not checked in the email service for this page.
+At send time the server reads the recipient account language (`users.language`). The language shown in the interface is not the input. Reminders, the hold-ready email, the event announcement, the loan closed by inventory, password reset, and the second-factor code pass that value to `language_chain` (`server/src/email_templates.rs`).
+
+Resolution order:
+
+| Account language | Template order |
+| --- | --- |
+| `english` | `english`, then `french` |
+| `french` | `french`, then `english` |
+| missing (`NULL`), `unknown`, or any other value (`german`, `spanish`, `italian`, …) | `french`, then `english` |
+
+For each language in the chain, a row already stored in the database is tried first, then the file `{id}.{language}.json`. The column `users.language` is `VARCHAR(32) DEFAULT 'french'` and stays nullable. An account that kept that default is already `french`. A missing preference stored as `NULL` follows the same French-then-English chain.
