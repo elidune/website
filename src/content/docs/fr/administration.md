@@ -13,11 +13,11 @@ Les paramètres sont dans `/settings`. Un compte `admin` voit tous les onglets. 
 <figure>
 <picture>
 <source srcset="/screens/fr/dark/settings.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/fr/light/settings.webp" alt="Image de remplacement de l’écran des paramètres, thème clair." width="1440" height="900" />
+<img src="/screens/fr/light/settings.webp" alt="Paramètres de la bibliothèque, thème clair." width="1440" height="900" />
 </picture>
 </figure>
 
-Emplacement de capture : paramètres (`settings`).
+Capture : paramètres (`settings`).
 
 ## Onglets
 
@@ -28,8 +28,9 @@ Emplacement de capture : paramètres (`settings`).
 | Types de public | Publics, âges, abonnement, dérogations de prêt |
 | Types de compte | Droits par type de compte |
 | Modèles d’e-mails | Textes envoyés |
-| Sources | Lieux de conservation et de retrait |
-| Serveurs Z39.50 | Cibles d’import |
+| Gestion des sites | Lieux de conservation et de retrait |
+| Serveurs Z39.50 | Cibles d’import, si le module est actif |
+| Modules | Fonctionnalités facultatives, y compris le profil `essential` |
 | Serveur | Relances, expiration des réservations, journaux, rétention d’audit, SMTP, réindexation, dump SQL |
 | Audit | Journal des opérations sensibles |
 
@@ -39,7 +40,7 @@ Les sections surchargeables du modèle `sample.toml` incluent la journalisation,
 
 ## Rôles et droits
 
-Le type de compte (`guest`, `reader`, `group`, `librarian`, `admin`) porte des niveaux. Pour les documents, les usagers, les paramètres et les événements : aucun, lecture, écriture. Pour les prêts : aucun, lecture, écriture. Pour les réservations : aucun, soi-même (`own`), lecture, écriture.
+Le type de compte (`guest`, `reader`, `group`, `librarian`, `admin`) porte des niveaux. Pour les documents, les lecteurs, les paramètres et les événements : aucun, lecture, écriture. Pour les prêts : aucun, lecture, écriture. Pour les réservations : aucun, soi-même (`own`), lecture, écriture.
 
 Jeu initial après migrations :
 
@@ -50,7 +51,9 @@ Jeu initial après migrations :
 | `librarian` | écriture | écriture | écriture | écriture | lecture |
 | `admin` | écriture | écriture | écriture | écriture | écriture |
 
-Le droit `own` sur les prêts ne permet pas d’ouvrir `/loans`. Il permet au lecteur de voir et de prolonger ses prêts. Le droit `own` sur les réservations permet de créer et d’annuler les siennes. Les acquisitions ont un droit séparé, `acquisitions_rights` (`n`, `r`, `w`), à `w` pour `librarian` et `admin` après la migration `032`.
+Le droit `own` sur les prêts ne permet pas d’ouvrir `/loans`. Il permet au lecteur de voir et de prolonger ses prêts. Le droit `own` sur les réservations permet de créer et d’annuler les siennes. D’autres lettres existent sur le type de compte : `acquisitions_rights`, `weeding_rights`, `weeding_cancel_rights`, `items_archive_rights`, `circulation_override_rights`, `events_rights`. Le type `librarian` livré a l’écriture partout sauf les paramètres (lecture) et la dérogation de circulation (`n`). Le type `admin` livré a l’écriture, y compris cette dérogation. Des types personnalisés se créent dans l’onglet Types de compte. Les types système ne se suppriment pas.
+
+L’onglet Modules expose les drapeaux de `GET /api/v1/library-info` (`enabledFeatures`). Le fichier peut fixer `profile = "essential"`, qui désactive acquisitions, suggestions d’achat, désherbage, transits, dépôts et compteurs de fréquentation, même si les booléens du même fichier disent le contraire. Événements, inventaire, Z39.50, import MARC et statistiques restent actifs. Un module coupé répond HTTP 403 `feature_disabled`. Les compteurs de fréquentation ont une API (`/api/v1/visitor-counts`, droit de lecture des paramètres) et un interrupteur de module. L’interface ne leur consacre pas d’écran.
 
 L’onglet Types de compte modifie ces lettres. Changer le type d’un utilisateur reste une action d’administrateur.
 
@@ -80,9 +83,9 @@ Modèles livrés : `overdue_reminder`, `overdue_second_reminder`, `overdue_forma
 
 L’action de guichet s’appelle « Anonymiser pour les stats ». L’API reste `DELETE /api/v1/users/{id}`. `force=true` rend d’abord les prêts actifs, puis efface.
 
-L’identifiant interne n’est pas réécrit. Le statut passe à `deleted`, les jetons sont révoqués, et les champs d’identité (identifiant, mot de passe, nom, e-mail, adresse, téléphone, code-barres, date de naissance, notes, second facteur) passent à null. Le type de compte, le type de public, la date de création et la date de fin d’abonnement restent. Les archives de prêts gardent des dimensions (tranche d’âge à la date du prêt, année, ville, type de public, type de compte) et perdent le lien vers la personne. Les réservations actives sont supprimées. Les amendes perdent l’usager. Les e-mails en attente vers cette adresse sont supprimés. Le journal d’audit ne stocke pas les données effacées.
+L’identifiant interne n’est pas réécrit. Le statut passe à `deleted`, les jetons sont révoqués, et les champs d’identité (identifiant, mot de passe, nom, e-mail, adresse, téléphone, code-barres, date de naissance, notes, second facteur) passent à null. Le type de compte, le type de public, la date de création et la date de fin d’abonnement restent. Les archives de prêts gardent des dimensions (tranche d’âge à la date du prêt, année, ville, type de public, type de compte) et perdent le lien vers la personne. Les réservations actives sont supprimées. Les amendes perdent le lecteur. Les e-mails en attente vers cette adresse sont supprimés. Le journal d’audit ne stocke pas les données effacées.
 
-Le passage automatique est `[privacy] auto_anonymize_years_after_expiry` (`ELIDUNE_PRIVACY__AUTO_ANONYMIZE_YEARS_AFTER_EXPIRY`). Défaut 0 : tâche arrêtée. Une valeur typique citée par le dépôt pour une bibliothèque municipale est 3, en années après `expiry_at`. La tâche tourne à 04:00. Elle ignore les usagers qui ont encore un prêt actif. Chaque anonymisation écrit `user.deleted` avec `trigger` égal à `retention_job`, et un événement de compteurs `system.privacy_auto_erasure`.
+Le passage automatique est `[privacy] auto_anonymize_years_after_expiry` (`ELIDUNE_PRIVACY__AUTO_ANONYMIZE_YEARS_AFTER_EXPIRY`). Défaut 0 : tâche arrêtée. Une valeur typique citée par le dépôt pour une bibliothèque municipale est 3, en années après `expiry_at`. La tâche tourne à 04:00. Elle ignore les lecteurs qui ont encore un prêt actif. Chaque anonymisation écrit `user.deleted` avec `trigger` égal à `retention_job`, et un événement de compteurs `system.privacy_auto_erasure`.
 
 Le détail colonne par colonne est `docs/README-patron-erasure.md` dans le dépôt logiciel.
 

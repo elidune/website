@@ -21,9 +21,9 @@ The [elidune/elidune](https://github.com/elidune/elidune) repository holds the A
 
 nginx serves the UI files and reverse-proxies `/api`. Axum does not serve the SPA. The API prefix is `/api/v1`, as a relative URL.
 
-A request goes handler `server/src/api/`, service `server/src/services/`, SQL `server/src/repository/`. Migrations are numbered SQL files in `server/migrations/`. A published migration file is not edited.
+A request goes handler `server/src/api/`, service `server/src/services/`, SQL `server/src/repository/`. The shipped schema is the single file `server/migrations/001_initial_schema.sql`. A database that already ran the former files `002` through `072` follows `server/database/reset_sqlx_migrations.sql` before deploy. See [Installation](/en/docs/installation/).
 
-Code vocabulary: **biblio** (record), **item** (physical copy), **loan**, **hold**, **source** (place).
+Code vocabulary: **biblio** (record), **item** (physical copy), **loan**, **hold**, **site** (place). Some JSON responses still name the place `sourceName`.
 
 ## Run locally
 
@@ -36,7 +36,13 @@ cargo run -- --config config/default.toml
 
 The sample connection string is `postgres://elidune:elidune@localhost:5432/elidune`. Redis: `redis://127.0.0.1:6379`. Pending migrations run at startup.
 
-> **TODO.** The README names `--config config/default.toml`, and that file is in `.gitignore`. The repository does not describe copying from `sample.toml`. Do that locally before the first `cargo run`.
+Before that first start, copy the versioned sample to the gitignored file. `.gitignore` lists `**/config/default.toml`. From `server/`:
+
+```bash
+cp config/sample.toml config/default.toml
+```
+
+From the repository root: `cp server/config/sample.toml server/config/default.toml`. The [README](https://github.com/elidune/elidune/blob/dev/README.md) then gives the `cargo run` command above. File keys are in [`server/README.md`](https://github.com/elidune/elidune/blob/dev/server/README.md). The same step is noted in [Installation](/en/docs/installation/).
 
 UI (Node, pnpm only, `ui/pnpm-lock.yaml`):
 
@@ -87,9 +93,9 @@ pnpm build
 
 ## Contributing
 
-Pull requests target `main` or `dev`, because CI listens on both branches. An API change and the matching UI change ship in the same set of commits. Server code and comments are in English. Visible UI strings go through `t('key')`.
+Contributions are proposed as pull requests into `dev`. The maintainer squash-merges them. `main` receives published releases (the image tag `:latest` follows a push to `main`, see above). This squash practice is the maintainer’s. It is not written in `AGENTS.md` or in the workflows. CI still listens on `main` and `dev`.
 
-> **TODO.** The repository does not say whether a merge must be a squash. Nothing in `AGENTS.md` or in the workflows requires that method.
+An API change and the matching UI change ship in the same set of commits. Server code and comments are in English. Visible UI strings go through `t('key')`.
 
 ## UI translations
 

@@ -13,11 +13,11 @@ Une **notice** (biblio) décrit une œuvre ou une édition. Un **exemplaire** (i
 <figure>
 <picture>
 <source srcset="/screens/fr/dark/catalogue.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/fr/light/catalogue.webp" alt="Image de remplacement de la liste du catalogue, thème clair." width="1440" height="900" />
+<img src="/screens/fr/light/catalogue.webp" alt="Liste du catalogue, thème clair." width="1440" height="900" />
 </picture>
 </figure>
 
-Emplacement de capture : liste du catalogue (`catalogue`). La fiche notice a un emplacement distinct (`record`).
+Capture : liste du catalogue (`catalogue`). La fiche notice a une capture distincte (`record`). L’import MARC en mode dépôt est décrit dans [Dépôts](/fr/documentation/deposits/).
 
 ## Créer et modifier
 
@@ -29,7 +29,7 @@ Types de média reconnus par l’API, en camelCase : `printedText`, `comics`, `p
 
 Séries et collections ont leurs propres routes (`/api/v1/series`, `/api/v1/collections`) : nom, titres secondaires, ISSN pour une collection.
 
-La suppression d’une notice demande le même droit d’écriture. L’écran de suppression peut forcer le retrait d’exemplaires encore empruntés.
+La suppression d’une notice demande le même droit d’écriture. Elle n’est possible que s’il ne reste aucun exemplaire et aucune réservation (`biblio_has_items`, `biblio_has_holds`). `force` ne lève pas ces refus.
 
 Export CSV : `GET /api/v1/biblios/export.csv`.
 

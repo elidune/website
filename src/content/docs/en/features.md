@@ -1,6 +1,6 @@
 ---
 title: Features
-description: "Guide map by area: catalogue, circulation, acquisitions, OPAC, statistics, sites, and languages."
+description: "Guide map: catalogue, deposits, circulation, acquisitions, OPAC, statistics, sites, and languages."
 navTitle: Overview
 order: 30
 section: features
@@ -8,26 +8,27 @@ draft: false
 locale: en
 ---
 
-Each area has its own page. Paths below are those of the React UI, served on the same origin as the `/api/v1` API.
+Each area has its own page. Paths are those of the React interface, served on the same origin as the `/api/v1` API. The version described is branch `dev` of [elidune/elidune](https://github.com/elidune/elidune) (commit `c169546`, single schema file `001_initial_schema.sql`).
 
 ## At the desk and on the shelves
 
 - [Catalogue](/en/docs/catalogue/): records, Z39.50, MARC import, search.
-- [Items](/en/docs/copies/): barcodes, call numbers, availability, inventory.
-- [Patrons](/en/docs/patrons/): accounts, subscription, legal guardian.
-- [Loans and returns](/en/docs/circulation/): desk, renewals, exceptions.
-- [Holds](/en/docs/holds/): title queue, shelf pick, pickup.
-- [Reminders and fines](/en/docs/reminders-fines/): overdue email and the fine scale.
-- [Weeding](/en/docs/weeding/): candidate, withdrawn.
+- [Copies](/en/docs/copies/): barcodes, call numbers, circulation states, public and internal notes.
+- [Deposits](/en/docs/deposits/): lenders, batches, MARC import in deposit mode, return to the lender, losses.
+- [Inventory](/en/docs/inventory/): session, scan, close, consolidation.
+- [Patrons](/en/docs/patrons/): accounts, audience type derived from the date of birth, legal guardian, anonymisation.
+- [Loans and returns](/en/docs/circulation/): desk, forced checkout with a reason, exceptions, tablet desk.
+- [Holds](/en/docs/holds/): queue per record, pick list, pickup site.
+- [Reminders and fines](/en/docs/reminders-fines/): three email levels, amounts in cents, payment capped at the balance still due.
+- [Weeding](/en/docs/weeding/): candidate, withdrawal, destination.
 
 ## Around the catalogue
 
-- [Acquisitions and suggestions](/en/docs/acquisitions/): vendors, funds, orders, suggestions.
+- [Acquisitions and suggestions](/en/docs/acquisitions/): vendors, funds, orders, receiving, suggestions.
 - [OPAC](/en/docs/opac/): public catalogue without an account, and the patron area.
-- [Statistics](/en/docs/statistics/): catalogue, patrons, loans, advanced query.
-- [Multiple sites](/en/docs/sites/): sources, pickup, transits.
-- [Languages](/en/docs/languages/): interface language and record language.
+- [Events](/en/docs/events/): announcements, audiences, consent, unsubscribe.
+- [Statistics](/en/docs/statistics/): catalogue, patrons, loans, advanced query, visitor counts.
+- [Multiple sites](/en/docs/sites/): sites, pickup, transits.
+- [Languages](/en/docs/languages/): interface and message language.
 
-The sidebar also has **Events** (`/events`, staff management at `/events/manage`): announcements, audiences, and sending consent. These screens are not described here yet.
-
-> **TODO.** Describe events (audiences, consent, unsubscribe at `/events/unsubscribe`) from `docs/` and the `EventsPage` / `PublicEventsPage` screens, without guessing email-template contents.
+Optional modules (acquisitions, purchase suggestions, weeding, transits, deposits, events, inventory, Z39.50, MARC import, statistics, visitor counts) are switched in Settings, Modules, or with `ELIDUNE_FEATURES__PROFILE=essential`. The `essential` profile turns off acquisitions, purchase suggestions, weeding, transits, deposits, and visitor counts. See [Administration](/en/docs/administration/).

@@ -59,13 +59,14 @@ Le contenu décrit le dépôt [elidune/elidune](https://github.com/elidune/elidu
 
 ### Captures d’écran
 
-Emplacements, à remplacer par de vraies images puis à reconstruire :
+Captures réelles, français et anglais, thème clair et sombre, bureau et mobile :
 
 ```text
-public/screens/{fr,en}/{light,dark}/{desk,record,catalogue,holds,settings,opac-loans}.webp
+public/screens/{fr,en}/{light,dark}/{desk,record,catalogue,holds,settings,opac-loans,deposits,acquisitions,weeding,inventory,patrons,transits}.webp
+public/screens/{fr,en}/{light,dark}/{…}-mobile.webp
 ```
 
-Mettre à jour le texte alternatif dans les fichiers de messages en même temps. `node scripts/placeholders.mjs` régénère les emplacements.
+`node scripts/capture-screens.mjs` les refait depuis une instance Elidune déjà lancée (voir l’en-tête du script). `node scripts/placeholders.mjs` ne régénère que des emplacements vides. Mettre à jour le texte alternatif dans les fichiers de messages en même temps.
 
 ## Recherche
 

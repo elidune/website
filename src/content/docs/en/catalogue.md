@@ -13,11 +13,11 @@ A **biblio** describes a work or an edition. An **item** is a physical object at
 <figure>
 <picture>
 <source srcset="/screens/en/dark/catalogue.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/en/light/catalogue.webp" alt="Placeholder image of the catalogue list, light theme." width="1440" height="900" />
+<img src="/screens/en/light/catalogue.webp" alt="Catalogue list, light theme." width="1440" height="900" />
 </picture>
 </figure>
 
-Screenshot slot: catalogue list (`catalogue`). The record screen has a separate slot (`record`).
+Screenshot: catalogue list (`catalogue`). The record screen has a separate shot (`record`). MARC import in deposit mode is described in [Deposits](/en/docs/deposits/).
 
 ## Create and edit
 
@@ -29,7 +29,7 @@ Media types the API accepts, in camelCase: `printedText`, `comics`, `periodic`, 
 
 Series and collections have their own routes (`/api/v1/series`, `/api/v1/collections`): name, secondary titles, ISSN for a collection.
 
-Deleting a biblio needs the same write right. The delete screen can force removal of items that are still on loan.
+Deleting a biblio needs the same write right. It is possible only when no copy and no hold remain (`biblio_has_items`, `biblio_has_holds`). `force` does not lift those refusals.
 
 CSV export: `GET /api/v1/biblios/export.csv`.
 

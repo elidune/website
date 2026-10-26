@@ -28,9 +28,9 @@ The Library tab stores the name, address, country, time zone, email, phones, and
 
 ## Sites
 
-In this software, a holding or pickup location is a **source** (`sources`). Settings, Sources tab: create a name, choose the default source, rename, archive, merge. A merge moves items onto the new source and archives the old ones.
+A holding or pickup place is a **site** (`sites` table). Settings, Sites tab: create a name, choose the default site, rename, archive, merge. A merge reassigns copies and archives the old sites. On a fresh database, the first site added after `MyLibrary` fails once (sequence; see [Installation](/en/docs/installation/)).
 
-Each item stores the source where it sits. A hold can name a pickup site, which is also a source. Movement between sites is described in [Multiple sites](/en/docs/sites/).
+Each item stores the site where it sits (`siteId`). A hold can name a pickup site (`pickupSiteId`). Movement between sites is described in [Multiple sites](/en/docs/sites/).
 
 ## Loan rules
 
@@ -62,19 +62,19 @@ Staff search uses Meilisearch (index `items`) when it answers, otherwise Postgre
 
 ## First item
 
-From the biblio, add an item: barcode, call number, source (site), and a borrowable flag. The code name for the physical copy is **item**. Details are in [Items](/en/docs/copies/).
+From the biblio, add an item: barcode, call number, site, and a borrowable flag. The code name for the physical copy is **item**. Details are in [Items](/en/docs/copies/).
 
 ## First patron
 
-Circulation menu, Users (`/users`). Creation asks for identity, a login, an account type, and a public type.
+Circulation menu, Readers (`/users`). Creation asks for identity, a login, and an account type.
 
-Account types shipped by migrations are `guest`, `reader`, `librarian`, `admin`, and `group`. For a patron, choose `reader`. Public type `child` requires a legal guardian. The subscription has an end date, or none (unlimited). The card barcode is what the desk scans.
+Account types shipped by migrations are `guest`, `reader`, `librarian`, `admin`, and `group`. For a patron, choose `reader`. A `reader` public type is computed from the birth date. Public type `child` requires a legal guardian. The subscription has an end date, or none (unlimited). The card barcode is what the desk scans.
 
-The patron signs in with that login at `/`, then opens “My loans” (`/my-loans`).
+The patron signs in with that login at `/`, then opens “My Loans” (`/my-loans`).
 
 ## First loan and first return
 
-Circulation menu, Loans/returns (`/loans`). Four tabs: loan, return, overdue, claims.
+Circulation menu (`/loans`). Four tabs: loan, return, overdue, claims.
 
 **Loan.** Identify the patron, then type or scan the item barcode. The server refuses the loan when the cap is reached, when the item is withdrawn, already held for someone else, in transit, or when the unpaid fine balance is over the threshold. Staff can force some of these cases. The barcode field takes focus again for a scanner.
 
@@ -83,11 +83,11 @@ Circulation menu, Loans/returns (`/loans`). Four tabs: loan, return, overdue, cl
 <figure>
 <picture>
 <source srcset="/screens/en/dark/desk.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/en/light/desk.webp" alt="Placeholder image of the loan desk, light theme." width="1440" height="900" />
+<img src="/screens/en/light/desk.webp" alt="Loan desk, light theme." width="1440" height="900" />
 </picture>
 </figure>
 
-Screenshot slot: loan desk (`desk`).
+Screenshot: desk (`desk`). The same screen tightens on a tablet. See [Loans and returns](/en/docs/circulation/).
 
 ## Next
 

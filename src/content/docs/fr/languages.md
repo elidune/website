@@ -20,12 +20,18 @@ Sans session, la langue suit le navigateur. Avec une session, elle suit la langu
 
 ## Notices et comptes
 
-La langue d’une notice ou d’un usager utilise la liste du serveur : `unknown`, `french`, `english`, `german`, `spanish`, `italian`, `portuguese`, `japanese`, `chinese`, `russian`, `arabic`, `dutch`, `swedish`, `norwegian`, `danish`, `finnish`, `polish`, `czech`, `hungarian`, `romanian`, `turkish`, `korean`, `latin`, `greek`, `croatian`, `hindi`, `hebrew`, `persian`, `catalan`, `thai`, `vietnamese`, `indonesian`, `malay`.
+La langue d’une notice ou d’un lecteur utilise la liste du serveur : `unknown`, `french`, `english`, `german`, `spanish`, `italian`, `portuguese`, `japanese`, `chinese`, `russian`, `arabic`, `dutch`, `swedish`, `norwegian`, `danish`, `finnish`, `polish`, `czech`, `hungarian`, `romanian`, `turkish`, `korean`, `latin`, `greek`, `croatian`, `hindi`, `hebrew`, `persian`, `catalan`, `thai`, `vietnamese`, `indonesian`, `malay`.
 
 Seules les quatre premières langues parlées ont une interface traduite. Les autres restent des valeurs de fiche.
 
 ## Modèles d’e-mail
 
-Les fichiers livrés existent en `.french.json` et `.english.json` : relances, réservation prête, réinitialisation de mot de passe, code de second facteur, code de secours, annonce d’événement, prêt clos par inventaire. L’onglet Modèles d’e-mails édite ces textes.
+`SUPPORTED_LANGUAGES` accepte `english`, `french`, `german` et `spanish`. L’onglet Modèles d’e-mails n’édite que le français et l’anglais.
 
-> **TODO.** Le critère qui choisit le fichier `.french` ou `.english` au moment de l’envoi (langue du compte, langue de l’interface, repli) n’a pas été vérifié dans le service d’e-mail pour cette page.
+Deux chaînes coexistent dans `server/src/email_templates.rs`. Aucune ne lit la langue affichée dans l’interface.
+
+**Avis au lecteur** (`notice_language_order`) : relances, réservation prête (`hold_ready`), réinitialisation de mot de passe. Ordre : langue du compte si elle est française, anglaise, allemande ou espagnole, puis langue de la bibliothèque, puis français, puis anglais. L’italien, `unknown` et une valeur absente sont sautés. Les fichiers livrés de ces modèles existent dans les quatre langues.
+
+**Autres messages** (`language_chain`) : code de second facteur, code de secours, annonce d’événement, prêt clos par inventaire. Français puis anglais, ou anglais puis français. Toute autre langue, y compris l’allemand et l’espagnol, commence par le français. Ces modèles ne sont livrés qu’en `.french.json` et `.english.json`.
+
+Pour chaque langue, une ligne déjà enregistrée en base est essayée d’abord, puis le fichier `{id}.{langue}.json`. La colonne `users.language` est `VARCHAR(32) DEFAULT 'french'` et reste nullable.

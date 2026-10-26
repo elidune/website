@@ -10,6 +10,16 @@ locale: en
 
 This guide follows `docker/` and `docs/README-docker.md` in [elidune/elidune](https://github.com/elidune/elidune) (branch `dev`). Variable details stay in [`docker/.env.example`](https://github.com/elidune/elidune/blob/dev/docker/.env.example) and [`server/config/sample.toml`](https://github.com/elidune/elidune/blob/dev/server/config/sample.toml).
 
+## Local start without Docker
+
+Before the first `cargo run`, copy the versioned sample to the gitignored file:
+
+```bash
+cp server/config/sample.toml server/config/default.toml
+```
+
+`.gitignore` lists `**/config/default.toml`. From the `server/` directory, the same copy is `cp config/sample.toml config/default.toml`. The [application README](https://github.com/elidune/elidune/blob/dev/README.md) then starts the API with `cd server` and `cargo run -- --config config/default.toml`. File keys are described in [`server/README.md`](https://github.com/elidune/elidune/blob/dev/server/README.md). Tests and CI: [Developers](/en/docs/developers/).
+
 ## Requirements
 
 - Docker 20.10 or newer, and Docker Compose v2 (`docker compose`).
@@ -34,13 +44,13 @@ Run the commands below from the root of the software repository.
 
 The API listens on HTTP port 8080 inside the container. nginx serves the UI and forwards `/api` to the API. The API does not serve UI files.
 
-On each push to `main` or `dev` that touches the server, the UI, or Docker, GitHub Actions publishes three images:
+On a push to `main` or `dev` that touches the server, the UI, or Docker, GitHub Actions publishes images. `elidune-server` and `elidune-ui` are built on `main` only. `elidune-all-in-one` is built on `main` and on `dev`.
 
 | Image | Dockerfile | Tags |
 | --- | --- | --- |
-| `ghcr.io/elidune/elidune-server` | `docker/Dockerfile` | `:latest` on `main`, `:dev` on `dev`, plus the Git SHA |
+| `ghcr.io/elidune/elidune-server` | `docker/Dockerfile` | `:latest` and the SHA, on `main` only |
 | `ghcr.io/elidune/elidune-ui` | `docker/Dockerfile.ui` | same |
-| `ghcr.io/elidune/elidune-all-in-one` | `docker/Dockerfile.all-in-one` | same |
+| `ghcr.io/elidune/elidune-all-in-one` | `docker/Dockerfile.all-in-one` | `:latest` on `main`, `:dev` on `dev`, plus the SHA |
 
 A push to `dev` does not replace `:latest`.
 
@@ -202,7 +212,23 @@ If the browser calls the API on another origin, set `ELIDUNE_SERVER__CORS_ORIGIN
 1. Back up the volumes or take an SQL dump (next section).
 2. Choose a tag (`:latest`, `:dev`, or a SHA) in `ELIDUNE_IMAGE` / `ELIDUNE_UI_IMAGE`.
 3. `docker compose … pull`, then `docker compose … up -d`.
-4. On startup the API applies pending migrations. An applied migration file is not edited: the repository adds a new numbered file.
+4. On startup the API applies pending migrations.
+
+The repository now ships a single file, `server/migrations/001_initial_schema.sql`. A fresh database records only version 1. A database that already applied the former `002`–`072` chain must realign `_sqlx_migrations` **once**, before deploying a binary that only contains `001`:
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f server/database/reset_sqlx_migrations.sql
+```
+
+Run that from the software repository root. From `server/`, the README’s relative path is `database/reset_sqlx_migrations.sql`. Do not run this script on a fresh database. The detail is in [`server/README.md`](https://github.com/elidune/elidune/blob/dev/server/README.md), section “Squashed migrations”.
+
+That file inserts explicit identifiers (`sites`, `public_types`, `public_type_loan_settings`, `loans_settings`, `fine_rules`, `z3950servers`) without `setval`. The first `INSERT` that lets PostgreSQL choose the identifier reuses `1` and returns HTTP 500 (`database_error`, constraint `23505`). `nextval` is not rolled back: a second attempt receives the next identifier. To align a sequence with the maximum already stored:
+
+```sql
+SELECT setval(pg_get_serial_sequence('sites', 'id'), (SELECT MAX(id) FROM sites));
+```
+
+The same form applies to the other tables in the list.
 
 The Docker guide asks for planned downtime and for a restore test on a copy before an upgrade.
 

@@ -8,9 +8,11 @@ interface Props {
 }
 
 const { locale } = Astro.props;
-const rows: { name: 'record' | 'holds' | 'opac-loans'; kicker: MessageKey; title: MessageKey; body: MessageKey; alt: MessageKey; caption: MessageKey }[] = [
+const rows: { name: 'record' | 'holds' | 'opac-loans' | 'deposits' | 'acquisitions'; kicker: MessageKey; title: MessageKey; body: MessageKey; alt: MessageKey; caption: MessageKey }[] = [
   { name: 'record', kicker: 'tour.record.kicker', title: 'tour.record.title', body: 'tour.record.body', alt: 'shot.record.alt', caption: 'shot.record.caption' },
   { name: 'holds', kicker: 'tour.holds.kicker', title: 'tour.holds.title', body: 'tour.holds.body', alt: 'shot.holds.alt', caption: 'shot.holds.caption' },
+  { name: 'deposits', kicker: 'tour.deposits.kicker', title: 'tour.deposits.title', body: 'tour.deposits.body', alt: 'shot.deposits.alt', caption: 'shot.deposits.caption' },
+  { name: 'acquisitions', kicker: 'tour.acq.kicker', title: 'tour.acq.title', body: 'tour.acq.body', alt: 'shot.acquisitions.alt', caption: 'shot.acquisitions.caption' },
   { name: 'opac-loans', kicker: 'tour.opac.kicker', title: 'tour.opac.title', body: 'tour.opac.body', alt: 'shot.opac.alt', caption: 'shot.opac.caption' },
 ];
 ---

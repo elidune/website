@@ -21,11 +21,11 @@ These public routes are limited to 600 requests per minute per IP address, burst
 <figure>
 <picture>
 <source srcset="/screens/en/dark/opac-loans.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/en/light/opac-loans.webp" alt="Placeholder image of the patron loan area, light theme." width="1440" height="900" />
+<img src="/screens/en/light/opac-loans.webp" alt="My loans page, light theme." width="1440" height="900" />
 </picture>
 </figure>
 
-Screenshot slot: patron loans (`opac-loans`).
+Screenshot: patron loans (`opac-loans`). A copy on loan exposes `expectedReturnDate` (a date, library time zone) while the due date has not passed. Lost, missing, weeding, and withdrawn copies are absent from that list.
 
 ## Once signed in
 

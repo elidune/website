@@ -1,6 +1,6 @@
 ---
 title: Statistiques
-description: Écrans catalogue, usagers et prêts, et requête avancée.
+description: Écrans catalogue, lecteurs et prêts, et requête avancée.
 navTitle: Statistiques
 order: 40
 section: features
@@ -8,13 +8,15 @@ draft: false
 locale: fr
 ---
 
-`/stats` est réservé au personnel (`librarian` ou `admin`). Quatre onglets : catalogue, usagers, prêts, avancé.
+`/stats` suit le module `stats` et le catalogue interne. Quatre onglets : catalogue, lecteurs, évolution des prêts, requête avancée. `GET /api/v1/stats` exige le droit de lecture sur les exemplaires. La requête avancée (`GET /api/v1/stats/schema`, `POST /api/v1/stats/query`) est réservée à un compte `librarian` ou `admin`.
 
-## Catalogue, usagers, prêts
+Les compteurs de fréquentation (`visitor_counts`) ont une API `GET` et `POST /api/v1/visitor-counts`, avec le droit de lecture des paramètres, et un interrupteur dans Modules. L’interface ne leur consacre pas d’écran.
 
-L’onglet catalogue interroge `GET /api/v1/stats/catalog` et peut ventiler par année, par source et par type de média ou de public.
+## Catalogue, lecteurs, prêts
 
-L’onglet usagers interroge `GET /api/v1/stats/users` (classements, agrégats, année). L’onglet prêts interroge `GET /api/v1/stats/loans`. Un compte qui n’est pas administrateur est limité à ses propres lignes sur les statistiques de prêts. L’administrateur voit l’ensemble, ou filtre par usager.
+L’onglet catalogue interroge `GET /api/v1/stats/catalog` et peut ventiler par année, par site (réponse `bySource`, libellé `siteName`) et par type de média ou de public.
+
+L’onglet lecteurs interroge `GET /api/v1/stats/users` (classements, agrégats, année). L’onglet prêts interroge `GET /api/v1/stats/loans`. Un compte qui n’est pas administrateur est limité à ses propres lignes sur les statistiques de prêts. L’administrateur voit l’ensemble, ou filtre par lecteur.
 
 `GET /api/v1/stats` exige le droit de lecture sur les documents.
 

@@ -8,13 +8,15 @@ draft: false
 locale: en
 ---
 
-`/stats` is limited to staff (`librarian` or `admin`). Four tabs: catalogue, users, loans, advanced.
+`/stats` follows the `stats` module and the internal catalogue. Four tabs: catalogue, patrons, loan trend, advanced query. `GET /api/v1/stats` requires read rights on copies. The advanced query (`GET /api/v1/stats/schema`, `POST /api/v1/stats/query`) is limited to a `librarian` or `admin` account.
+
+Visitor counts (`visitor_counts`) have a `GET` and `POST /api/v1/visitor-counts` API, with settings read, and a switch under Modules. The interface has no screen for them.
 
 ## Catalogue, users, loans
 
-The catalogue tab calls `GET /api/v1/stats/catalog` and can break figures down by year, by source, and by media type or public type.
+The catalogue tab calls `GET /api/v1/stats/catalog` and can break figures down by year, by site (response field `bySource`, label `siteName`), and by media type or public type.
 
-The users tab calls `GET /api/v1/stats/users` (rankings, aggregates, year). The loans tab calls `GET /api/v1/stats/loans`. An account that is not an administrator is limited to its own rows on loan statistics. The administrator sees the whole set, or filters by user.
+The patrons tab calls `GET /api/v1/stats/users` (rankings, aggregates, year). The loans tab calls `GET /api/v1/stats/loans`. An account that is not an administrator is limited to its own rows on loan statistics. The administrator sees the whole set, or filters by patron.
 
 `GET /api/v1/stats` requires read access on documents.
 

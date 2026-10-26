@@ -43,12 +43,22 @@ try {
         await page.setViewportSize(viewport);
         await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
         await page.goto(origin + pathname, { waitUntil: 'domcontentloaded' });
-        const results = await new AxeBuilder({ page })
-          .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-          .analyze();
-        for (const violation of results.violations) {
-          const nodes = violation.nodes.map((node) => node.target.join(' ')).join('; ');
-          failures.push(`${pathname} [${viewport.width}/${scheme}] ${violation.id}: ${violation.help} (${nodes})`);
+        const tags = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
+        const collect = (results, label) => {
+          for (const violation of results.violations) {
+            const nodes = violation.nodes.map((node) => node.target.join(' ')).join('; ');
+            failures.push(`${pathname} [${viewport.width}/${scheme}${label}] ${violation.id}: ${violation.help} (${nodes})`);
+          }
+        };
+        collect(await new AxeBuilder({ page }).withTags(tags).analyze(), '');
+        const shots = page.locator('a[data-shot]');
+        if ((await shots.count()) > 0) {
+          await page.waitForFunction(() => document.documentElement.dataset.shotLightbox === 'ready');
+          await shots.first().click();
+          await page.locator('#shot-lightbox[open]').waitFor();
+          collect(await new AxeBuilder({ page }).withTags(tags).analyze(), '/dialog');
+          await page.keyboard.press('Escape');
+          await page.waitForFunction(() => !document.querySelector('#shot-lightbox')?.hasAttribute('open'));
         }
         await page.close();
       }

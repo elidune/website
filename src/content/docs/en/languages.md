@@ -26,6 +26,12 @@ Only the four spoken languages above have a translated interface. The others rem
 
 ## Email templates
 
-Shipped files exist as `.french.json` and `.english.json`: reminders, hold ready, password reset, second-factor code, recovery code, event announcement, loan closed by inventory. The Email templates tab edits those texts.
+`SUPPORTED_LANGUAGES` accepts `english`, `french`, `german`, and `spanish`. The Email templates tab edits French and English only.
 
-> **TODO.** The rule that picks the `.french` or `.english` file at send time (account language, interface language, fallback) was not checked in the email service for this page.
+Two chains coexist in `server/src/email_templates.rs`. Neither reads the language shown in the interface.
+
+**Patron notices** (`notice_language_order`): reminders, hold ready (`hold_ready`), password reset. Order: the account language when it is French, English, German, or Spanish, then the library language, then French, then English. Italian, `unknown`, and a missing value are skipped. Shipped files for these templates exist in all four languages.
+
+**Other messages** (`language_chain`): second-factor code, recovery code, event announcement, loan closed by inventory. French then English, or English then French. Any other language, including German and Spanish, starts with French. Those templates ship only as `.french.json` and `.english.json`.
+
+For each language, a row already stored in the database is tried first, then the file `{id}.{language}.json`. The column `users.language` is `VARCHAR(32) DEFAULT 'french'` and stays nullable.

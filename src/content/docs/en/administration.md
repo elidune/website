@@ -13,11 +13,11 @@ Settings live at `/settings`. An `admin` account sees every tab. A `librarian` a
 <figure>
 <picture>
 <source srcset="/screens/en/dark/settings.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/en/light/settings.webp" alt="Placeholder image of the settings screen, light theme." width="1440" height="900" />
+<img src="/screens/en/light/settings.webp" alt="Library settings, light theme." width="1440" height="900" />
 </picture>
 </figure>
 
-Screenshot slot: settings (`settings`).
+Screenshot: settings (`settings`).
 
 ## Tabs
 
@@ -28,8 +28,9 @@ Screenshot slot: settings (`settings`).
 | Public types | Audiences, ages, subscription, loan overrides |
 | Account types | Rights per account type |
 | Email templates | Texts that are sent |
-| Sources | Holding and pickup places |
-| Z39.50 servers | Import targets |
+| Sites | Holding and pickup places |
+| Z39.50 servers | Import targets, when the module is on |
+| Modules | Optional features, including the `essential` profile |
 | Server | Reminders, hold expiry, logs, audit retention, SMTP, reindex, SQL dump |
 | Audit | Log of sensitive operations |
 
@@ -50,7 +51,9 @@ Seeded set after migrations:
 | `librarian` | write | write | write | write | read |
 | `admin` | write | write | write | write | write |
 
-`own` on loans does not open `/loans`. It lets the patron see and renew their own loans. `own` on holds lets them create and cancel their own. Acquisitions have a separate right, `acquisitions_rights` (`n`, `r`, `w`), set to `w` for `librarian` and `admin` by migration `032`.
+`own` on loans does not open `/loans`. It lets the patron see and renew their own loans. `own` on holds lets them create and cancel their own. Other letters live on the account type: `acquisitions_rights`, `weeding_rights`, `weeding_cancel_rights`, `items_archive_rights`, `circulation_override_rights`, `events_rights`. The shipped `librarian` type has write everywhere except settings (read) and circulation override (`n`). The shipped `admin` type has write, including that override. Custom types are created on the Account types tab. System types cannot be deleted.
+
+The Modules tab exposes the flags from `GET /api/v1/library-info` (`enabledFeatures`). The file can set `profile = "essential"`, which turns off acquisitions, purchase suggestions, weeding, transits, deposits, and visitor counts, even when booleans in the same file say otherwise. Events, inventory, Z39.50, MARC import, and statistics stay on. A disabled module returns HTTP 403 `feature_disabled`. Visitor counts have an API (`/api/v1/visitor-counts`, settings read) and a module switch. The interface has no screen for them.
 
 The Account types tab edits these letters. Changing a user’s type remains an administrator action.
 

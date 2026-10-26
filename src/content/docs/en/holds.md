@@ -13,11 +13,11 @@ There is one kind of hold. The queue belongs to the **biblio**. A concrete item 
 <figure>
 <picture>
 <source srcset="/screens/en/dark/holds.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/en/light/holds.webp" alt="Placeholder image of the holds screen, light theme." width="1440" height="900" />
+<img src="/screens/en/light/holds.webp" alt="Holds list, light theme." width="1440" height="900" />
 </picture>
 </figure>
 
-Screenshot slot: holds (`holds`).
+Screenshot: holds (`holds`).
 
 ## Place a hold
 
@@ -30,7 +30,7 @@ Both create the same row, on the same biblio. A patron whose `holds_rights` is `
 
 One active hold (`pending`, `to_pick`, or `ready`) per patron per biblio. Each active hold counts as one toward `maxActiveHolds` (default 20, editable, with an optional public-type override).
 
-The pickup site (`pickupSiteId`) is a source. See [Multiple sites](/en/docs/sites/).
+The pickup site (`pickupSiteId`) is a site. See [Multiple sites](/en/docs/sites/). Two notes coexist: `patronNote` (visible to the patron) and `internalNote` (staff only). The `hold_ready` email includes the title, the barcode, the deadline, and the pickup site (`pickup_site`), in the library time zone. It does not substitute the copy’s home site for the pickup site.
 
 ## Shelf pick
 
@@ -38,7 +38,7 @@ As soon as a title hold finds a shelf item that is borrowable, not withdrawn, no
 
 With no free item, the row stays `pending`, in arrival order.
 
-`/pick-list` (`GET /api/v1/holds/pick-list`) lists `to_pick` rows. A site filter limits the list to the item’s current source. `pickDelayDays` (default 2, in the hold policy) flags overdue pick-list rows. It does not cancel the hold.
+`/pick-list` (`GET /api/v1/holds/pick-list`) lists `to_pick` rows. A site filter limits the list to the item’s current site. `pickDelayDays` (default 2, in the hold policy) flags overdue pick-list rows. It does not cancel the hold.
 
 “Not on shelf” (`POST /api/v1/holds/{id}/pick-not-found`) marks the item `toSearch` and reassigns the hold, or returns it to `pending`. A later scan of that barcode clears `toSearch` and follows the normal return path.
 
