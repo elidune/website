@@ -1,0 +1,154 @@
+---
+import type { Locale } from '../i18n/locales';
+import { t } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+---
+
+<dialog
+  id="shot-lightbox"
+  class="shot-lightbox"
+  aria-labelledby="shot-lightbox-title"
+  data-position-template={t(locale, 'shot.position')}
+>
+  <div class="shot-lightbox-bar">
+    <p id="shot-lightbox-title" class="sr-only">{t(locale, 'shot.lightbox')}</p>
+    <button type="button" class="shot-lightbox-btn" data-shot-close>{t(locale, 'shot.close')}</button>
+  </div>
+  <div class="shot-lightbox-stage">
+    <button type="button" class="shot-lightbox-btn" data-shot-prev>{t(locale, 'shot.prev')}</button>
+    <figure>
+      <img data-shot-img alt={t(locale, 'shot.lightbox')} width="1440" height="900" decoding="async" />
+      <figcaption data-shot-caption></figcaption>
+    </figure>
+    <button type="button" class="shot-lightbox-btn" data-shot-next>{t(locale, 'shot.next')}</button>
+  </div>
+  <p class="shot-lightbox-count" data-shot-count></p>
+  <p class="sr-only" data-shot-live aria-live="polite" aria-atomic="true"></p>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('#shot-lightbox');
+  const root = document.documentElement;
+
+  if (!dialog || typeof dialog.showModal !== 'function') {
+    root.dataset.shotLightbox = 'ready';
+  } else {
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[data-shot]'));
+    const image = dialog.querySelector<HTMLImageElement>('[data-shot-img]');
+    const caption = dialog.querySelector<HTMLElement>('[data-shot-caption]');
+    const counter = dialog.querySelector<HTMLElement>('[data-shot-count]');
+    const live = dialog.querySelector<HTMLElement>('[data-shot-live]');
+    const closeButton = dialog.querySelector<HTMLButtonElement>('[data-shot-close]');
+    const template = dialog.dataset.positionTemplate ?? '{current} / {total}';
+    const mobileQuery = window.matchMedia('(max-width: 600px)');
+    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    let index = 0;
+    let returnFocus: HTMLElement | null = null;
+    let pointerStart: { x: number; y: number } | null = null;
+
+    const sourceFor = (link: HTMLAnchorElement) => {
+      const mobile = mobileQuery.matches;
+      const dark = darkQuery.matches;
+      if (mobile && dark) return link.dataset.darkMobile ?? link.dataset.light ?? link.href;
+      if (mobile) return link.dataset.lightMobile ?? link.dataset.light ?? link.href;
+      if (dark) return link.dataset.dark ?? link.dataset.light ?? link.href;
+      return link.dataset.light ?? link.href;
+    };
+
+    const show = (next: number) => {
+      if (!links.length || !image || !caption || !counter || !live) return;
+      index = (next + links.length) % links.length;
+      const link = links[index];
+      const src = sourceFor(link);
+      const text = link.dataset.caption ?? link.dataset.alt ?? '';
+      const mobile = mobileQuery.matches;
+      image.src = src;
+      image.alt = link.dataset.alt ?? text;
+      image.width = mobile ? 780 : 1440;
+      image.height = mobile ? 1688 : 900;
+      caption.textContent = text;
+      const current = String(index + 1);
+      const total = String(links.length);
+      counter.textContent = `${current} / ${total}`;
+      live.textContent = template.replaceAll('{current}', current).replaceAll('{total}', total);
+      link.href = src;
+    };
+
+    const open = (next: number, from: HTMLElement | null) => {
+      returnFocus = from;
+      show(next);
+      if (!dialog.open) dialog.showModal();
+      closeButton?.focus();
+    };
+
+    links.forEach((link, linkIndex) => {
+      link.setAttribute('aria-haspopup', 'dialog');
+      link.href = sourceFor(link);
+      link.addEventListener('click', (event) => {
+        if (event.defaultPrevented || event.button !== 0) return;
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        open(linkIndex, link);
+      });
+    });
+
+    dialog.querySelector('[data-shot-prev]')?.addEventListener('click', () => show(index - 1));
+    dialog.querySelector('[data-shot-next]')?.addEventListener('click', () => show(index + 1));
+    closeButton?.addEventListener('click', () => dialog.close());
+
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+
+    dialog.addEventListener('close', () => {
+      returnFocus?.focus();
+      returnFocus = null;
+      if (live) live.textContent = '';
+    });
+
+    dialog.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        show(index - 1);
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        show(index + 1);
+      }
+    });
+
+    const stage = dialog.querySelector('.shot-lightbox-stage');
+    stage?.addEventListener('pointerdown', (event) => {
+      if (!(event instanceof PointerEvent)) return;
+      if (event.pointerType === 'mouse') return;
+      if (event.target instanceof Element && event.target.closest('button')) return;
+      pointerStart = { x: event.clientX, y: event.clientY };
+    });
+    stage?.addEventListener('pointerup', (event) => {
+      if (!pointerStart || !(event instanceof PointerEvent)) return;
+      const dx = event.clientX - pointerStart.x;
+      const dy = event.clientY - pointerStart.y;
+      pointerStart = null;
+      if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return;
+      show(dx < 0 ? index + 1 : index - 1);
+    });
+    stage?.addEventListener('pointercancel', () => {
+      pointerStart = null;
+    });
+
+    const refresh = () => {
+      links.forEach((link) => {
+        link.href = sourceFor(link);
+      });
+      if (dialog.open) show(index);
+    };
+    mobileQuery.addEventListener('change', refresh);
+    darkQuery.addEventListener('change', refresh);
+
+    root.dataset.shotLightbox = 'ready';
+  }
+</script>
