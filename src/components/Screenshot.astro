@@ -2,7 +2,19 @@
 import type { Locale } from '../i18n/locales';
 
 interface Props {
-  name: 'desk' | 'record' | 'catalogue' | 'holds' | 'settings' | 'opac-loans';
+  name:
+    | 'desk'
+    | 'record'
+    | 'catalogue'
+    | 'holds'
+    | 'settings'
+    | 'opac-loans'
+    | 'deposits'
+    | 'acquisitions'
+    | 'weeding'
+    | 'inventory'
+    | 'patrons'
+    | 'transits';
   locale: Locale;
   alt: string;
   caption?: string;

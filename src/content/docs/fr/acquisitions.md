@@ -8,22 +8,31 @@ draft: false
 locale: fr
 ---
 
-Le menu Acquisitions n’apparaît que si le droit `acquisitions_rights` vaut `r` ou `w` (`canViewAcquisitions`). L’écriture (fournisseurs, budgets, commandes) exige `w`. Les migrations mettent `w` pour `librarian` et `admin`, `n` sinon. Ce droit est distinct du catalogage.
+Le menu Acquisitions n’apparaît que si le droit `acquisitions_rights` vaut `r` ou `w` et si le module est actif. L’écriture (fournisseurs, budgets, commandes) exige `w`. Les types `librarian` et `admin` livrés ont `w`, les autres `n`. Ce droit est distinct du catalogage.
+
+<figure>
+<picture>
+<source srcset="/screens/fr/dark/acquisitions.webp" media="(prefers-color-scheme: dark)" />
+<img src="/screens/fr/light/acquisitions.webp" alt="Écran des acquisitions, thème clair." width="1440" height="900" />
+</picture>
+</figure>
+
+Capture : acquisitions (`acquisitions`).
 
 | Écran | Chemin |
 | --- | --- |
-| Commandes | `/acquisitions/orders` et `/acquisitions/orders/{id}` |
-| Fournisseurs | `/acquisitions/vendors` |
-| Budgets | `/acquisitions/funds` |
-| Suggestions | `/acquisitions/suggestions` |
+| Commandes | `/acquisitions?tab=orders` et la fiche `/acquisitions/orders/{id}` |
+| Fournisseurs | `/acquisitions?tab=vendors` |
+| Budgets | `/acquisitions?tab=funds` |
+| Suggestions | `/acquisitions?tab=suggestions` |
 
-`/acquisitions` redirige vers la liste des commandes.
+`/acquisitions/orders`, `/acquisitions/vendors`, `/acquisitions/funds` et `/acquisitions/suggestions` redirigent vers ces onglets.
 
 ## Fournisseurs, budgets, commandes
 
 L’ordre de travail prévu par les écrans : enregistrer un fournisseur et un budget, puis ouvrir une commande et y ajouter des lignes. La fiche commande est une page distincte.
 
-Les tables viennent de la migration `032_acquisitions.sql`. Cette page ne recopie pas le schéma.
+Les tables `acquisition_vendors`, `acquisition_funds` et `purchase_orders` sont dans `001_initial_schema.sql`. Cette page ne recopie pas le schéma. La réception (`POST /api/v1/acquisitions/orders/{id}/receive`) augmente `quantity_received` et crée les exemplaires physiques.
 
 ### Statuts de commande
 

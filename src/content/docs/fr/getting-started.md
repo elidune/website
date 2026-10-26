@@ -1,6 +1,6 @@
 ---
 title: Premiers pas
-description: Connexion, bibliothèque, sites, règles de prêt, première notice, premier usager, premier prêt et retour.
+description: Connexion, bibliothèque, sites, règles de prêt, première notice, premier lecteur, premier prêt et retour.
 navTitle: Premiers pas
 order: 20
 section: start
@@ -16,7 +16,7 @@ La page d’accueil non connectée affiche le formulaire de connexion et, sur le
 
 Le corps de `POST /api/v1/auth/login` utilise l’identifiant ou l’e-mail, et le mot de passe. Si le compte a activé un second facteur, l’étape suivante appelle `POST /api/v1/auth/verify-2fa` ou `POST /api/v1/auth/verify-recovery`.
 
-Mot de passe oublié : `/forgot-password`, puis le lien reçu (`/reset-password`). Aucun e-mail ne part si `ELIDUNE_SERVER__PUBLIC_BASE_URL` est vide. Cinq échecs sur le même identifiant en 15 minutes bloquent temporairement les essais. Un membre du personnel qui a le droit d’écriture sur les usagers lève ce blocage depuis la fiche (`DELETE /api/v1/auth/rate-limit/{login}`).
+Mot de passe oublié : `/forgot-password`, puis le lien reçu (`/reset-password`). Aucun e-mail ne part si `ELIDUNE_SERVER__PUBLIC_BASE_URL` est vide. Cinq échecs sur le même identifiant en 15 minutes bloquent temporairement les essais. Un membre du personnel qui a le droit d’écriture sur les lecteurs lève ce blocage depuis la fiche (`DELETE /api/v1/auth/rate-limit/{login}`).
 
 Un jeton dont la portée est limitée au changement de mot de passe envoie vers `/change-password`.
 
@@ -28,9 +28,9 @@ L’onglet Bibliothèque enregistre le nom, l’adresse, le pays, le fuseau hora
 
 ## Sites
 
-Dans ce logiciel, un site de conservation ou de retrait est une **source** (`sources`). Paramètres, onglet Sources : créer un nom, choisir la source par défaut, renommer, archiver, fusionner. La fusion réaffecte les exemplaires à la nouvelle source et archive les anciennes.
+Un lieu de conservation ou de retrait est un **site** (table `sites`). Paramètres, onglet Gestion des sites : créer un nom, choisir le site par défaut, renommer, archiver, fusionner. La fusion réaffecte les exemplaires et archive les anciens sites. Sur une base neuve, le premier site ajouté après `MyLibrary` échoue une fois (séquence, voir [Installation](/fr/documentation/installation/)).
 
-Chaque exemplaire porte la source où il se trouve. Une réservation peut indiquer un site de retrait, qui est aussi une source. Le transit entre sites est décrit dans [Multi-sites](/fr/documentation/sites/).
+Chaque exemplaire porte le site où il se trouve (`siteId`). Une réservation peut indiquer un site de retrait (`pickupSiteId`). Le transit entre sites est décrit dans [Multi-sites](/fr/documentation/sites/).
 
 ## Règles de prêt
 
@@ -62,32 +62,32 @@ La recherche du personnel s’appuie sur Meilisearch (index `items`) lorsqu’il
 
 ## Premier exemplaire
 
-Depuis la notice, ajouter un exemplaire : code-barres, cote, source (site), indicateur « empruntable ». Le vocabulaire du code est **item** pour l’exemplaire physique. Le détail est dans [Exemplaires](/fr/documentation/copies/).
+Depuis la notice, ajouter un exemplaire : code-barres, cote, site, indicateur « empruntable ». Le vocabulaire du code est **item** pour l’exemplaire physique. Le détail est dans [Exemplaires](/fr/documentation/copies/).
 
-## Premier usager
+## Premier lecteur
 
-Menu Circulation, Usagers (`/users`). La création demande l’identité, un identifiant, un type de compte et un type de public.
+Menu Circulation, Lecteurs (`/users`). La création demande l’identité, un identifiant et un type de compte.
 
-Les types de compte livrés sont `guest`, `reader`, `librarian`, `admin` et `group`. Pour un lecteur, choisir `reader`. Un type de public `child` exige un responsable légal. L’abonnement a une date de fin, ou aucune (illimité). Le code-barres de la carte sert au guichet.
+Les types de compte livrés sont `guest`, `reader`, `librarian`, `admin` et `group`. Pour un lecteur, choisir `reader`. Le type de public d’un `reader` est calculé à partir de la date de naissance. Un type `child` exige un responsable légal. L’abonnement a une date de fin, ou aucune (illimité). Le code-barres de la carte sert au guichet.
 
-Le lecteur se connecte avec son identifiant sur `/`, puis voit « Mes emprunts » (`/my-loans`).
+Le lecteur se connecte avec son identifiant sur `/`, puis voit « Mes Emprunts » (`/my-loans`).
 
 ## Premier prêt et premier retour
 
-Menu Circulation, Emprunts/Retours (`/loans`). Quatre onglets : prêt, retour, retards, réclamations.
+Menu Circulation (`/loans`). Quatre onglets : prêt, retour, retards, réclamations.
 
-**Prêt.** Identifier l’usager, puis saisir ou scanner le code-barres de l’exemplaire. Le serveur refuse le prêt si le plafond est atteint, si l’exemplaire est sorti du fonds, déjà réservé pour quelqu’un d’autre, en transit, ou si le solde d’amendes impayées dépasse le seuil. Le personnel peut forcer certains de ces cas. Le champ code-barres reprend le focus pour un lecteur de codes.
+**Prêt.** Identifier le lecteur, puis saisir ou scanner le code-barres de l’exemplaire. Le serveur refuse le prêt si le plafond est atteint, si l’exemplaire est sorti du fonds, déjà réservé pour quelqu’un d’autre, en transit, ou si le solde d’amendes impayées dépasse le seuil. Le personnel peut forcer certains de ces cas. Le champ code-barres reprend le focus pour un lecteur de codes.
 
 **Retour.** Onglet Retour, scanner le code-barres (`POST /api/v1/loans/items/{code-barres}/return`). Si une réservation attend cet exemplaire, le retour le marque prêt à retirer ou ouvre un transit vers le site de retrait. Voir [Réservations](/fr/documentation/holds/).
 
 <figure>
 <picture>
 <source srcset="/screens/fr/dark/desk.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/fr/light/desk.webp" alt="Image de remplacement du bureau des prêts, thème clair." width="1440" height="900" />
+<img src="/screens/fr/light/desk.webp" alt="Guichet des emprunts, thème clair." width="1440" height="900" />
 </picture>
 </figure>
 
-Emplacement de capture : bureau des prêts (`desk`).
+Capture : guichet (`desk`). Le même écran se resserre sur une tablette. Voir [Prêts et retours](/fr/documentation/circulation/).
 
 ## Suite
 

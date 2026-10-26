@@ -13,11 +13,11 @@ Une **notice** (biblio) décrit une œuvre ou une édition. Un **exemplaire** (i
 <figure>
 <picture>
 <source srcset="/screens/fr/dark/catalogue.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/fr/light/catalogue.webp" alt="Image de remplacement de la liste du catalogue, thème clair." width="1440" height="900" />
+<img src="/screens/fr/light/catalogue.webp" alt="Liste du catalogue, thème clair." width="1440" height="900" />
 </picture>
 </figure>
 
-Emplacement de capture : liste du catalogue (`catalogue`). La fiche notice a un emplacement distinct (`record`).
+Capture : liste du catalogue (`catalogue`). La fiche notice a une capture distincte (`record`). L’import MARC en mode dépôt est décrit dans [Dépôts](/fr/documentation/deposits/).
 
 ## Créer et modifier
 

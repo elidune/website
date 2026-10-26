@@ -16,7 +16,16 @@ Le désherbage est un statut de l’exemplaire, distinct du prêt, de la perte e
 | `candidate` | Candidat. Reste en rayon et peut encore être prêté, prolongé ou réservé |
 | `withdrawn` | Sorti du fonds. Plus de prêt, de prolongation ni de réservation |
 
-L’interface le dit ainsi : un candidat reste en rayon. Un exemplaire sorti ne circule plus. La notice reste.
+L’interface le dit ainsi : un candidat reste en rayon. Un exemplaire sorti ne circule plus. La notice reste. Un exemplaire de dépôt répond `deposit_item_not_owned` : il ne se désherbe pas. Voir [Dépôts](/fr/documentation/deposits/).
+
+<figure>
+<picture>
+<source srcset="/screens/fr/dark/weeding.webp" media="(prefers-color-scheme: dark)" />
+<img src="/screens/fr/light/weeding.webp" alt="Liste de désherbage, thème clair." width="1440" height="900" />
+</picture>
+</figure>
+
+Capture : désherbage (`weeding`).
 
 ## Changer le statut
 

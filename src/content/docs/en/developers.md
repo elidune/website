@@ -21,9 +21,9 @@ The [elidune/elidune](https://github.com/elidune/elidune) repository holds the A
 
 nginx serves the UI files and reverse-proxies `/api`. Axum does not serve the SPA. The API prefix is `/api/v1`, as a relative URL.
 
-A request goes handler `server/src/api/`, service `server/src/services/`, SQL `server/src/repository/`. Migrations are numbered SQL files in `server/migrations/`. A published migration file is not edited.
+A request goes handler `server/src/api/`, service `server/src/services/`, SQL `server/src/repository/`. The shipped schema is the single file `server/migrations/001_initial_schema.sql`. A database that already ran the former files `002` through `072` follows `server/database/reset_sqlx_migrations.sql` before deploy. See [Installation](/en/docs/installation/).
 
-Code vocabulary: **biblio** (record), **item** (physical copy), **loan**, **hold**, **source** (place).
+Code vocabulary: **biblio** (record), **item** (physical copy), **loan**, **hold**, **site** (place). Some JSON responses still name the place `sourceName`.
 
 ## Run locally
 

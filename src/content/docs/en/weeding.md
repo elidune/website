@@ -16,7 +16,16 @@ Weeding is a status of the item, separate from the loan, from loss, and from arc
 | `candidate` | Candidate. Stays on the shelf and can still be loaned, renewed, or held |
 | `withdrawn` | Withdrawn. No loan, no renewal, no hold |
 
-The UI states it this way: a candidate stays on the shelf. A withdrawn item no longer circulates. The biblio remains.
+The UI states it this way: a candidate stays on the shelf. A withdrawn item no longer circulates. The biblio remains. A deposited copy returns `deposit_item_not_owned`: it is not weeded. See [Deposits](/en/docs/deposits/).
+
+<figure>
+<picture>
+<source srcset="/screens/en/dark/weeding.webp" media="(prefers-color-scheme: dark)" />
+<img src="/screens/en/light/weeding.webp" alt="Weeding list, light theme." width="1440" height="900" />
+</picture>
+</figure>
+
+Screenshot: weeding (`weeding`).
 
 ## Change the status
 

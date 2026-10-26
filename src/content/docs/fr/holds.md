@@ -13,11 +13,11 @@ Il n’existe qu’un type de réservation. La file est celle de la **notice**. 
 <figure>
 <picture>
 <source srcset="/screens/fr/dark/holds.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/fr/light/holds.webp" alt="Image de remplacement de l’écran des réservations, thème clair." width="1440" height="900" />
+<img src="/screens/fr/light/holds.webp" alt="Liste des réservations, thème clair." width="1440" height="900" />
 </picture>
 </figure>
 
-Emplacement de capture : réservations (`holds`).
+Capture : réservations (`holds`).
 
 ## Poser une réservation
 
@@ -26,11 +26,11 @@ Emplacement de capture : réservations (`holds`).
 - `biblioId` : réservation de titre (OPAC ou guichet) ;
 - `itemId` : le personnel épingle un exemplaire.
 
-Les deux créent la même ligne, sur la même notice. Un lecteur dont le droit `holds_rights` vaut `own` ne peut réserver que pour lui-même. Le personnel (`write`) peut indiquer un autre usager. Le droit `read` seul ne crée pas de réservation.
+Les deux créent la même ligne, sur la même notice. Un lecteur dont le droit `holds_rights` vaut `own` ne peut réserver que pour lui-même. Le personnel (`write`) peut indiquer un autre lecteur. Le droit `read` seul ne crée pas de réservation.
 
 Une seule réservation active (`pending`, `to_pick` ou `ready`) par lecteur et par notice. Chaque réservation active compte pour un dans le plafond `maxActiveHolds` (défaut 20, réglable, avec une dérogation possible sur le type de public).
 
-Le site de retrait (`pickupSiteId`) est une source. Voir [Multi-sites](/fr/documentation/sites/).
+Le site de retrait (`pickupSiteId`) est un site. Voir [Multi-sites](/fr/documentation/sites/). Deux notes coexistent : `patronNote` (visible du lecteur) et `internalNote` (personnel seulement). L’e-mail `hold_ready` reprend le titre, le code-barres, la date limite et le site de retrait (`pickup_site`), dans le fuseau de la bibliothèque. Il ne reprend pas le site d’origine de l’exemplaire à la place du site de retrait.
 
 ## Prélèvement
 
@@ -38,7 +38,7 @@ Dès qu’une réservation de titre trouve un exemplaire en rayon, empruntable, 
 
 Sans exemplaire libre, la ligne reste `pending`, dans l’ordre d’arrivée.
 
-`/pick-list` (`GET /api/v1/holds/pick-list`) liste les `to_pick`. Un filtre de site restreint à la source actuelle de l’exemplaire. Le délai `pickDelayDays` (défaut 2, dans la politique des réservations) signale les lignes en retard. Il n’annule pas la réservation.
+`/pick-list` (`GET /api/v1/holds/pick-list`) liste les `to_pick`. Un filtre de site restreint au site actuel de l’exemplaire. Le délai `pickDelayDays` (défaut 2, dans la politique des réservations) signale les lignes en retard. Il n’annule pas la réservation.
 
 « Pas en rayon » (`POST /api/v1/holds/{id}/pick-not-found`) marque l’exemplaire `toSearch` et réaffecte la réservation, ou la remet `pending`. Un scan ultérieur de ce code-barres quitte `toSearch` et suit le circuit normal de retour.
 

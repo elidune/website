@@ -26,16 +26,12 @@ Only the four spoken languages above have a translated interface. The others rem
 
 ## Email templates
 
-Shipped files exist as `.french.json` and `.english.json`: reminders, hold ready, password reset, second-factor code, recovery code, event announcement, loan closed by inventory. The Email templates tab edits those texts. Packaged languages are `english` and `french` (`SUPPORTED_LANGUAGES`).
+`SUPPORTED_LANGUAGES` accepts `english`, `french`, `german`, and `spanish`. The Email templates tab edits French and English only.
 
-At send time the server reads the recipient account language (`users.language`). The language shown in the interface is not the input. Reminders, the hold-ready email, the event announcement, the loan closed by inventory, password reset, and the second-factor code pass that value to `language_chain` (`server/src/email_templates.rs`).
+Two chains coexist in `server/src/email_templates.rs`. Neither reads the language shown in the interface.
 
-Resolution order:
+**Patron notices** (`notice_language_order`): reminders, hold ready (`hold_ready`), password reset. Order: the account language when it is French, English, German, or Spanish, then the library language, then French, then English. Italian, `unknown`, and a missing value are skipped. Shipped files for these templates exist in all four languages.
 
-| Account language | Template order |
-| --- | --- |
-| `english` | `english`, then `french` |
-| `french` | `french`, then `english` |
-| missing (`NULL`), `unknown`, or any other value (`german`, `spanish`, `italian`, …) | `french`, then `english` |
+**Other messages** (`language_chain`): second-factor code, recovery code, event announcement, loan closed by inventory. French then English, or English then French. Any other language, including German and Spanish, starts with French. Those templates ship only as `.french.json` and `.english.json`.
 
-For each language in the chain, a row already stored in the database is tried first, then the file `{id}.{language}.json`. The column `users.language` is `VARCHAR(32) DEFAULT 'french'` and stays nullable. An account that kept that default is already `french`. A missing preference stored as `NULL` follows the same French-then-English chain.
+For each language, a row already stored in the database is tried first, then the file `{id}.{language}.json`. The column `users.language` is `VARCHAR(32) DEFAULT 'french'` and stays nullable.

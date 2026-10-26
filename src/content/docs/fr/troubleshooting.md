@@ -39,7 +39,7 @@ Contrôle HTTP : `GET /api/v1/health`. Le corps indique un état sain, une premi
 
 Une réponse 429 avec `code` égal à `rate_limited` et un en-tête `Retry-After` vient du quota, pas d’un mot de passe faux. Défaut : 30 requêtes d’authentification par minute et par IP. Derrière un reverse proxy, si tous les guichets partagent la même adresse, élargir `ELIDUNE_SERVER__AUTH_IP_PER_MINUTE` ou déclarer le proxy dans `ELIDUNE_SERVER__TRUSTED_PROXIES` pour que l’API lise `X-Forwarded-For`.
 
-Le blocage par identifiant (5 échecs / 15 minutes) se lève avec `DELETE /api/v1/auth/rate-limit/{login}` par un personnel qui a l’écriture sur les usagers.
+Le blocage par identifiant (5 échecs / 15 minutes) se lève avec `DELETE /api/v1/auth/rate-limit/{login}` par un personnel qui a l’écriture sur les lecteurs.
 
 ## E-mail
 

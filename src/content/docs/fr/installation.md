@@ -44,13 +44,13 @@ Les commandes ci-dessous se lancent depuis la racine du dépôt logiciel.
 
 L’API écoute en HTTP sur le port 8080 à l’intérieur du conteneur. nginx sert l’interface et transmet `/api` à l’API. L’API ne sert pas les fichiers de l’interface.
 
-Sur chaque poussée vers `main` ou `dev` qui touche le serveur, l’interface ou Docker, GitHub Actions publie trois images :
+Sur une poussée vers `main` ou `dev` qui touche le serveur, l’interface ou Docker, GitHub Actions publie les images. `elidune-server` et `elidune-ui` ne sont construites que sur `main`. `elidune-all-in-one` l’est sur `main` et sur `dev`.
 
 | Image | Dockerfile | Étiquettes |
 | --- | --- | --- |
-| `ghcr.io/elidune/elidune-server` | `docker/Dockerfile` | `:latest` sur `main`, `:dev` sur `dev`, plus le SHA Git |
+| `ghcr.io/elidune/elidune-server` | `docker/Dockerfile` | `:latest` et le SHA, sur `main` seulement |
 | `ghcr.io/elidune/elidune-ui` | `docker/Dockerfile.ui` | idem |
-| `ghcr.io/elidune/elidune-all-in-one` | `docker/Dockerfile.all-in-one` | idem |
+| `ghcr.io/elidune/elidune-all-in-one` | `docker/Dockerfile.all-in-one` | `:latest` sur `main`, `:dev` sur `dev`, plus le SHA |
 
 Une poussée sur `dev` ne remplace pas `:latest`.
 
@@ -212,7 +212,23 @@ Si le navigateur appelle l’API sur une autre origine, renseigner `ELIDUNE_SERV
 1. Sauvegarder les volumes ou un dump SQL (section suivante).
 2. Choisir une étiquette (`:latest`, `:dev` ou un SHA) dans `ELIDUNE_IMAGE` / `ELIDUNE_UI_IMAGE`.
 3. `docker compose … pull` puis `docker compose … up -d`.
-4. Au démarrage, l’API applique les migrations encore en attente. Un fichier de migration déjà appliqué ne se modifie pas : le dépôt en ajoute un nouveau numéroté.
+4. Au démarrage, l’API applique les migrations encore en attente.
+
+Le dépôt ne contient plus qu’un fichier, `server/migrations/001_initial_schema.sql`. Une base neuve n’enregistre que la version 1. Une base qui a déjà appliqué l’ancienne chaîne `002` à `072` doit réaligner `_sqlx_migrations` **une fois**, avant de déployer un binaire qui ne livre que `001` :
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f server/database/reset_sqlx_migrations.sql
+```
+
+La commande se lance depuis la racine du dépôt logiciel. Depuis `server/`, le chemin relatif du README est `database/reset_sqlx_migrations.sql`. Ne pas lancer ce script sur une base neuve. Le détail est dans [`server/README.md`](https://github.com/elidune/elidune/blob/dev/server/README.md), section « Squashed migrations ».
+
+Ce fichier insère des identifiants explicites (`sites`, `public_types`, `public_type_loan_settings`, `loans_settings`, `fine_rules`, `z3950servers`) sans `setval`. Le premier `INSERT` qui laisse PostgreSQL choisir l’identifiant reprend `1` et répond HTTP 500 (`database_error`, contrainte `23505`). `nextval` n’est pas annulé : une seconde tentative obtient l’identifiant suivant. Pour aligner une séquence sur le maximum déjà présent :
+
+```sql
+SELECT setval(pg_get_serial_sequence('sites', 'id'), (SELECT MAX(id) FROM sites));
+```
+
+La même forme vaut pour les autres tables de la liste.
 
 Le guide Docker demande de prévoir un arrêt et de tester la restauration sur une copie avant une montée de version.
 

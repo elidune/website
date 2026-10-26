@@ -8,11 +8,20 @@ draft: false
 locale: fr
 ---
 
-Le menu Usagers (`/users`) liste les comptes. La recherche porte sur le nom, le prénom et le code-barres. La fiche est `/users/{id}`.
+Le menu Lecteurs (`/users`) liste les comptes. La recherche porte sur le nom, le prénom et le code-barres. La fiche est `/users/{id}`. L’ouverture de l’écran suit le droit `users_rights`, pas le seul libellé `librarian`.
+
+<figure>
+<picture>
+<source srcset="/screens/fr/dark/patrons.webp" media="(prefers-color-scheme: dark)" />
+<img src="/screens/fr/light/patrons.webp" alt="Fiche lecteur, thème clair." width="1440" height="900" />
+</picture>
+</figure>
+
+Capture : fiche lecteur (`patrons`). Le nom figure sur la fiche. Il n’est pas repris sur un ticket, une étiquette ou un rapport de lot.
 
 ## Créer un compte
 
-Le personnel (`librarian` ou `admin`, droit d’écriture sur les usagers) envoie `POST /api/v1/users`. Champs demandés par les écrans : identité, identifiant, mot de passe, type de compte, type de public, coordonnées, date de naissance, langue, code-barres de carte.
+Le personnel (`librarian` ou `admin`, droit d’écriture sur les lecteurs) envoie `POST /api/v1/users`. Champs demandés par les écrans : identité, identifiant, mot de passe, type de compte, type de public, coordonnées, date de naissance, langue, code-barres de carte.
 
 Types de compte livrés par les migrations :
 
@@ -21,7 +30,7 @@ Types de compte livrés par les migrations :
 | `reader` | Lecteur. Emprunte et réserve pour lui-même |
 | `group` | Compte collectif, mêmes droits de circulation que `reader` après migration |
 | `guest` | Invité. Pas de prêt |
-| `librarian` | Personnel. Catalogue, usagers, prêts. Paramètres limités à la bibliothèque |
+| `librarian` | Personnel. Catalogue, lecteurs, prêts. Paramètres limités à la bibliothèque |
 | `admin` | Administrateur. Tous les onglets de paramètres |
 
 Le type de compte ne se change qu’avec un compte `admin` (`PUT /api/v1/users/{id}/account-type`). Forcer un changement de mot de passe à la prochaine connexion est aussi réservé à l’administrateur.
@@ -36,7 +45,13 @@ La fiche a une date de fin d’abonnement, ou aucune (abonnement sans date de fi
 
 `subscription_price` est un entier en centimes (`1500` = 15,00 €). L’écran des types de public saisit et affiche des euros : le libellé est « Prix d'abonnement (€) », l’affichage divise la valeur stockée par 100, et l’enregistrement multiplie le montant saisi par 100. Un appel API ou un `INSERT` dans `public_types.subscription_price` doit envoyer les centimes (`1500` pour 15,00 €).
 
-Un type de public `child` ne peut pas être inscrit sans responsable légal (`user_guardians`). Le sélecteur est sur la fiche.
+Un type de public `child` ne peut pas être inscrit sans responsable légal (`user_guardians`). Le sélecteur est sur la fiche. Le responsable ne peut pas lui-même être `child` ou `school`.
+
+Pour un compte `reader`, le type de public est dérivé de la date de naissance et des bornes `age_min` / `age_max`. Aucune borne ne correspond : la réponse est `no_public_type_for_age`. Un type de compte personnalisé n’est pas dérivé ainsi.
+
+L’onglet Amendes de la fiche liste les charges lorsque le droit de lecture sur les lecteurs est présent. Voir [Relances et amendes](/fr/documentation/reminders-fines/).
+
+Une carte déclarée perdue (`users.card_lost`) bloque le prêt. Le remplacement retire l’ancien numéro. Le détail des routes est dans [Prêts et retours](/fr/documentation/circulation/).
 
 ## Ce que le lecteur voit
 

@@ -8,22 +8,31 @@ draft: false
 locale: en
 ---
 
-The Acquisitions menu appears only when `acquisitions_rights` is `r` or `w` (`canViewAcquisitions`). Writing (vendors, funds, orders) requires `w`. Migrations set `w` for `librarian` and `admin`, and `n` otherwise. This right is separate from cataloguing.
+The Acquisitions menu appears only when `acquisitions_rights` is `r` or `w` and the module is on. Writing (vendors, funds, orders) requires `w`. Shipped `librarian` and `admin` types have `w`; the others have `n`. This right is separate from cataloguing.
+
+<figure>
+<picture>
+<source srcset="/screens/en/dark/acquisitions.webp" media="(prefers-color-scheme: dark)" />
+<img src="/screens/en/light/acquisitions.webp" alt="Acquisitions screen, light theme." width="1440" height="900" />
+</picture>
+</figure>
+
+Screenshot: acquisitions (`acquisitions`).
 
 | Screen | Path |
 | --- | --- |
-| Orders | `/acquisitions/orders` and `/acquisitions/orders/{id}` |
-| Vendors | `/acquisitions/vendors` |
-| Funds | `/acquisitions/funds` |
-| Suggestions | `/acquisitions/suggestions` |
+| Orders | `/acquisitions?tab=orders` and the record `/acquisitions/orders/{id}` |
+| Vendors | `/acquisitions?tab=vendors` |
+| Funds | `/acquisitions?tab=funds` |
+| Suggestions | `/acquisitions?tab=suggestions` |
 
-`/acquisitions` redirects to the order list.
+`/acquisitions/orders`, `/acquisitions/vendors`, `/acquisitions/funds`, and `/acquisitions/suggestions` redirect to those tabs.
 
 ## Vendors, funds, orders
 
 The order of work the screens imply: save a vendor and a fund, then open an order and add lines. The order record is a separate page.
 
-Tables come from migration `032_acquisitions.sql`. This page does not copy the schema.
+Tables `acquisition_vendors`, `acquisition_funds`, and `purchase_orders` live in `001_initial_schema.sql`. This page does not copy the schema. Receiving (`POST /api/v1/acquisitions/orders/{id}/receive`) increases `quantity_received` and creates the physical copies.
 
 ### Order statuses
 

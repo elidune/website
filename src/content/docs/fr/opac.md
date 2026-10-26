@@ -21,11 +21,11 @@ Ces routes publiques sont limitées à 600 requêtes par minute et par adresse I
 <figure>
 <picture>
 <source srcset="/screens/fr/dark/opac-loans.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/fr/light/opac-loans.webp" alt="Image de remplacement de l’espace prêts du lecteur, thème clair." width="1440" height="900" />
+<img src="/screens/fr/light/opac-loans.webp" alt="Page Mes emprunts, thème clair." width="1440" height="900" />
 </picture>
 </figure>
 
-Emplacement de capture : prêts du lecteur (`opac-loans`).
+Capture : prêts du lecteur (`opac-loans`). Un exemplaire en prêt expose `expectedReturnDate` (date, fuseau de la bibliothèque) tant que l’échéance n’est pas dépassée. Les exemplaires perdus, manquants, en cours de désherbage ou sortis du fonds sont absents de cette liste.
 
 ## Une fois connecté
 

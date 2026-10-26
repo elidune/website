@@ -35,7 +35,7 @@ Five failures in 15 minutes on the same login block further attempts. This is no
 ## Loans and holds
 
 **The loan button is not in the menu.**  
-`/loans` appears only for `librarian` and `admin`. A patron renews in `/my-loans`.
+`/loans` follows `loans_rights` (read to open the screen, write to check out). A patron renews in `/my-loans`.
 
 **A hold does not notify immediately.**  
 While the item is still on the shelf (`to_pick`), the patron is not notified. The notification is sent when the status becomes `ready`.
@@ -49,4 +49,4 @@ The default window is 7 days before the due date. Outside it, the server refuses
 “Anonymize for stats” removes the identity and keeps non-identifying dimensions on loan archives. See [Administration](/en/docs/administration/).
 
 **Are the screenshots on this site the software?**  
-No. They are placeholders (`public/screens/…`). Real screens will be added later.
+Yes. They come from an instance started from the `dev` branch, with fictional patrons and public-domain titles. None shows a patron name on a slip, a label, or a batch report.

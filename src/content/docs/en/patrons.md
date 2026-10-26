@@ -8,7 +8,16 @@ draft: false
 locale: en
 ---
 
-The Users menu (`/users`) lists accounts. Search covers last name, first name, and barcode. The record is `/users/{id}`.
+The Patrons menu (`/users`) lists accounts. Search covers last name, first name, and barcode. The record is `/users/{id}`. Opening the screen follows `users_rights`, not the `librarian` label alone.
+
+<figure>
+<picture>
+<source srcset="/screens/en/dark/patrons.webp" media="(prefers-color-scheme: dark)" />
+<img src="/screens/en/light/patrons.webp" alt="Patron record, light theme." width="1440" height="900" />
+</picture>
+</figure>
+
+Screenshot: patron record (`patrons`). The name is on the record. It is not repeated on a slip, a label, or a batch report.
 
 ## Create an account
 
@@ -36,7 +45,13 @@ The record has a subscription end date, or none (no end date). Renew stores a ne
 
 `subscription_price` is an integer in cents (`1500` = 15.00 €). The public-type screen takes and shows euros: the label is “Subscription price (€)”, display divides the stored value by 100, and save multiplies the entered amount by 100. An API call or an `INSERT` into `public_types.subscription_price` must send cents (`1500` for 15.00 €).
 
-Public type `child` cannot be enrolled without a legal guardian (`user_guardians`). The picker is on the patron record.
+Public type `child` cannot be enrolled without a legal guardian (`user_guardians`). The picker is on the patron record. The guardian cannot themselves be `child` or `school`.
+
+For a `reader` account, the public type is derived from the date of birth and the `age_min` / `age_max` bounds. No bound matches: the response is `no_public_type_for_age`. A custom account type is not derived that way.
+
+The Fines tab on the record lists charges when read rights on patrons are present. See [Reminders and fines](/en/docs/reminders-fines/).
+
+A card reported lost (`users.card_lost`) blocks checkout. Replacement retires the old number. The routes are in [Loans and returns](/en/docs/circulation/).
 
 ## What the patron sees
 
