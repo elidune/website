@@ -52,6 +52,8 @@ Un exemplaire de dépôt a `deposit_batch_id` renseigné. Les autres sont le fon
 - Une prolongation qui n’avancerait pas l’échéance répond `deposit_renewal_no_extension` ou `deposit_return_due`.
 - Un lot `returning` ou `closed`, ou dont la date de retour est dépassée, ne reçoit pas de nouvelle réservation (`deposit_batch_returning`).
 - Le désherbage d’un exemplaire déposé répond `deposit_item_not_owned`.
+- Un exemplaire déjà marqué renvoyé (`deposit_returned_at`) refuse un nouveau prêt : `deposit_item_returned_to_lender`. Ce refus n’est pas forçable.
+- Retirer l’exemplaire du catalogue (`DELETE /api/v1/items/{id}`) n’enregistre pas un retour au prêteur. Le détail est dans [Exemplaires](/fr/documentation/copies/).
 
 ## Retour au prêteur
 

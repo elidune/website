@@ -52,6 +52,8 @@ A deposited copy has `deposit_batch_id` set. The others are own stock.
 - A renewal that would not extend the due date returns `deposit_renewal_no_extension` or `deposit_return_due`.
 - A `returning` or `closed` batch, or one whose return date has passed, does not take a new hold (`deposit_batch_returning`).
 - Weeding a deposited copy returns `deposit_item_not_owned`.
+- A copy already marked sent back (`deposit_returned_at`) refuses a new checkout: `deposit_item_returned_to_lender`. That refusal cannot be forced.
+- Removing the copy from the catalogue (`DELETE /api/v1/items/{id}`) does not record a return to the lender. The detail is in [Items](/en/docs/copies/).
 
 ## Return to the lender
 

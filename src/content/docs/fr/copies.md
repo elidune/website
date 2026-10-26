@@ -35,7 +35,11 @@ Le catalogue public omet les exemplaires perdus, manquants, candidats au désher
 
 ## Modifier et supprimer
 
-`PUT /api/v1/items/{id}` met à jour la fiche. Le désherbage n’y passe pas : il a sa route, décrite dans [Désherbage](/fr/documentation/weeding/). `DELETE /api/v1/items/{id}` archive l’exemplaire (`archived_at`). Un historique de prêt, de réservation ou d’amende bloque la suppression. Le paramètre `force` est ignoré. Le retrait passe alors par le désherbage.
+`PUT /api/v1/items/{id}` met à jour la fiche. Le désherbage n’y passe pas : il a sa route, décrite dans [Désherbage](/fr/documentation/weeding/). `DELETE /api/v1/items/{id}` archive l’exemplaire (`archived_at`).
+
+Sur le fonds propre, `force` ne change rien. Un prêt ouvert, un transit demandé ou en cours, une réservation `pending`, `to_pick` ou `ready`, une amende impayée, ou une ligne dans `loans_archives` répondent 422. Le retrait passe alors par le désherbage.
+
+Sur un exemplaire de dépôt dont le lot est `active`, le premier appel répond 409 `deposit_item_delete_needs_confirmation`. `force=true` confirme l’archivage. Cela n’enregistre pas un retour au prêteur. Un prêt encore ouvert (`deposit_item_on_loan`) ou une amende impayée (`deposit_item_delete_unpaid_fine`) bloque. Un lot `returning` ou `closed` répond `deposit_item_delete_use_batch_return` : le scan de sortie du lot est la voie prévue. L’historique des prêts archivés ne bloque pas cet exemplaire.
 
 ## Inventaire
 

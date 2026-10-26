@@ -35,7 +35,11 @@ The public catalogue omits lost, missing, weeding-candidate, and withdrawn copie
 
 ## Edit and delete
 
-`PUT /api/v1/items/{id}` updates the record. Weeding does not travel on that request: it has its own route, described in [Weeding](/en/docs/weeding/). `DELETE /api/v1/items/{id}` archives the copy (`archived_at`). Loan, hold, or fine history blocks deletion. The `force` parameter is ignored. Withdrawal then goes through weeding.
+`PUT /api/v1/items/{id}` updates the record. Weeding does not travel on that request: it has its own route, described in [Weeding](/en/docs/weeding/). `DELETE /api/v1/items/{id}` archives the copy (`archived_at`).
+
+On own stock, `force` changes nothing. An open loan, a requested or in-transit move, a `pending`, `to_pick`, or `ready` hold, an unpaid fine, or a row in `loans_archives` returns 422. Withdrawal then goes through weeding.
+
+On a deposit copy whose batch is `active`, the first call returns 409 `deposit_item_delete_needs_confirmation`. `force=true` confirms the archive. That does not record a return to the lender. An open loan (`deposit_item_on_loan`) or an unpaid fine (`deposit_item_delete_unpaid_fine`) blocks it. A `returning` or `closed` batch returns `deposit_item_delete_use_batch_return`: scan-out on the batch is the intended path. Archived loan history does not block that copy.
 
 ## Inventory
 

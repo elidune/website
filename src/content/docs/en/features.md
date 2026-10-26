@@ -8,7 +8,7 @@ draft: false
 locale: en
 ---
 
-Each area has its own page. Paths are those of the React interface, served on the same origin as the `/api/v1` API. The version described is branch `dev` of [elidune/elidune](https://github.com/elidune/elidune) (commit `c902e67`, single schema file `001_initial_schema.sql`).
+Each area has its own page. Paths are those of the React interface, served on the same origin as the `/api/v1` API. The version described is branch `dev` of [elidune/elidune](https://github.com/elidune/elidune) (commit `c169546`, single schema file `001_initial_schema.sql`).
 
 ## At the desk and on the shelves
 

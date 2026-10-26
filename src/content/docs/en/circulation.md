@@ -42,7 +42,7 @@ A checkout refusal is HTTP 422 with a `code`. The desk shows the matching messag
 | `item_held_for_other` | Same | Yes |
 | `fines_over_threshold` | Yes, when `loans_rights` is write | No |
 | `max_loans`, `max_media_loans`, `item_not_loanable` | Yes for any caller who sends `force` | No |
-| `card_lost`, `item_to_pick_for_other`, `deposit_return_due` | No | — |
+| `card_lost`, `item_to_pick_for_other`, `deposit_return_due`, `deposit_item_returned_to_lender` | No | — |
 
 A missing reason when one is required returns `override_reason_required`. The **Force checkout** button appears only when the server marks the refusal `forceable` and the account has loan write. The shipped `librarian` type does not have `circulation_override_rights` write: only the shipped `admin` type can force an expired subscription or a copy held for someone else, until that right is granted in Settings.
 

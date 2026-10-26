@@ -8,7 +8,7 @@ draft: false
 locale: fr
 ---
 
-Chaque domaine a sa page. Les chemins cités sont ceux de l’interface React, servie sur la même origine que l’API `/api/v1`. La version décrite est celle de la branche `dev` du dépôt [elidune/elidune](https://github.com/elidune/elidune) (commit `c902e67`, schéma unique `001_initial_schema.sql`).
+Chaque domaine a sa page. Les chemins cités sont ceux de l’interface React, servie sur la même origine que l’API `/api/v1`. La version décrite est celle de la branche `dev` du dépôt [elidune/elidune](https://github.com/elidune/elidune) (commit `c169546`, schéma unique `001_initial_schema.sql`).
 
 ## Au guichet et dans les rayons
 

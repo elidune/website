@@ -42,7 +42,7 @@ Un refus de prêt est un HTTP 422 avec un `code`. Le guichet affiche le message 
 | `item_held_for_other` | Idem | Oui |
 | `fines_over_threshold` | Oui, si `loans_rights` est en écriture | Non |
 | `max_loans`, `max_media_loans`, `item_not_loanable` | Oui pour tout appel qui envoie `force` | Non |
-| `card_lost`, `item_to_pick_for_other`, `deposit_return_due` | Non | — |
+| `card_lost`, `item_to_pick_for_other`, `deposit_return_due`, `deposit_item_returned_to_lender` | Non | — |
 
 Sans motif alors qu’il est exigé, la réponse est `override_reason_required`. Le bouton **Forcer le prêt** de l’interface n’apparaît que si le serveur marque le refus `forceable` et si le compte a l’écriture sur les prêts. Le type `librarian` livré n’a pas `circulation_override_rights` en écriture : seul le type `admin` livré peut forcer un abonnement expiré ou un exemplaire réservé à un autre lecteur, tant que ce droit n’est pas accordé dans Paramètres.
 

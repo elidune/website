@@ -29,7 +29,7 @@ Types de média reconnus par l’API, en camelCase : `printedText`, `comics`, `p
 
 Séries et collections ont leurs propres routes (`/api/v1/series`, `/api/v1/collections`) : nom, titres secondaires, ISSN pour une collection.
 
-La suppression d’une notice demande le même droit d’écriture. L’écran de suppression peut forcer le retrait d’exemplaires encore empruntés.
+La suppression d’une notice demande le même droit d’écriture. Elle n’est possible que s’il ne reste aucun exemplaire et aucune réservation (`biblio_has_items`, `biblio_has_holds`). `force` ne lève pas ces refus.
 
 Export CSV : `GET /api/v1/biblios/export.csv`.
 

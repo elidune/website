@@ -29,7 +29,7 @@ Media types the API accepts, in camelCase: `printedText`, `comics`, `periodic`, 
 
 Series and collections have their own routes (`/api/v1/series`, `/api/v1/collections`): name, secondary titles, ISSN for a collection.
 
-Deleting a biblio needs the same write right. The delete screen can force removal of items that are still on loan.
+Deleting a biblio needs the same write right. It is possible only when no copy and no hold remain (`biblio_has_items`, `biblio_has_holds`). `force` does not lift those refusals.
 
 CSV export: `GET /api/v1/biblios/export.csv`.
 
