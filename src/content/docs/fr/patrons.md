@@ -1,6 +1,6 @@
 ---
 title: Lecteurs
-description: Comptes lecteurs, types de public, abonnement, responsable légal et anonymisation.
+description: Comptes, types de public, abonnement, responsable légal et anonymisation.
 navTitle: Lecteurs
 order: 33
 section: features
@@ -8,61 +8,54 @@ draft: false
 locale: fr
 ---
 
-Le menu Lecteurs (`/users`) liste les comptes. La recherche porte sur le nom, le prénom et le code-barres. La fiche est `/users/{id}`. L’ouverture de l’écran suit le droit `users_rights`, pas le seul libellé `librarian`.
+Le menu Lecteurs liste les comptes. La recherche porte sur le nom, le prénom et le code-barres. L’ouverture de l’écran suit le droit de consulter les lecteurs, pas seulement le titre « bibliothécaire ».
 
-<figure>
-<picture>
-<source srcset="/screens/fr/dark/patrons.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/fr/light/patrons.webp" alt="Fiche lecteur, thème clair." width="1440" height="900" />
-</picture>
-</figure>
+![Fiche lecteur, thème clair.](screen:patrons "La fiche montre le type de public et le responsable légal. Le nom n’est pas repris sur un ticket.")
 
-Capture : fiche lecteur (`patrons`). Le nom figure sur la fiche. Il n’est pas repris sur un ticket, une étiquette ou un rapport de lot.
+Le nom figure sur la fiche. Il n’est pas repris sur un ticket, une étiquette ou un rapport de lot.
 
 ## Créer un compte
 
-Le personnel (`librarian` ou `admin`, droit d’écriture sur les lecteurs) envoie `POST /api/v1/users`. Champs demandés par les écrans : identité, identifiant, mot de passe, type de compte, type de public, coordonnées, date de naissance, langue, code-barres de carte.
+Le personnel qui peut modifier les lecteurs crée le compte. Les écrans demandent l’identité, un identifiant, un mot de passe, le type de compte, le type de public, les coordonnées, la date de naissance, la langue et le code-barres de la carte.
 
-Types de compte livrés par les migrations :
-
-| Code | Rôle au guichet |
+| Type livré | Rôle au guichet |
 | --- | --- |
-| `reader` | Lecteur. Emprunte et réserve pour lui-même |
-| `group` | Compte collectif, mêmes droits de circulation que `reader` après migration |
-| `guest` | Invité. Pas de prêt |
-| `librarian` | Personnel. Catalogue, lecteurs, prêts. Paramètres limités à la bibliothèque |
-| `admin` | Administrateur. Tous les onglets de paramètres |
+| Lecteur | Emprunte et réserve pour lui-même |
+| Groupe | Compte collectif, mêmes droits de circulation qu’un lecteur |
+| Invité | Pas de prêt |
+| Bibliothécaire | Catalogue, lecteurs, prêts. Paramètres limités à la bibliothèque |
+| Administrateur | Tous les onglets de paramètres, y compris les dérogations de prêt |
 
-Le type de compte ne se change qu’avec un compte `admin` (`PUT /api/v1/users/{id}/account-type`). Forcer un changement de mot de passe à la prochaine connexion est aussi réservé à l’administrateur.
+Changer le type de compte d’une personne, ou exiger un nouveau mot de passe à la prochaine connexion, est réservé à l’administrateur.
 
-Mot de passe : 8 caractères au minimum. Aucune autre règle de complexité n’est appliquée par `validate_password_strength`.
+Le mot de passe compte au moins 8 caractères. Aucune autre règle de complexité n’est imposée.
 
 ## Type de public et abonnement
 
 Le type de public (enfant, adulte, scolaire, personnel, senior, ou un type ajouté dans Paramètres) porte l’âge, la durée d’abonnement, le tarif et, en option, des plafonds de prêt différents de la règle globale.
 
-La fiche a une date de fin d’abonnement, ou aucune (abonnement sans date de fin). Le bouton Renouveler enregistre une nouvelle date. Le tarif stocké au départ pour `adult` est l’entier `1500`, soit 15,00 €.
+La fiche a une date de fin d’abonnement, ou aucune (abonnement sans date de fin). Le bouton Renouveler enregistre une nouvelle date.
 
-`subscription_price` est un entier en centimes (`1500` = 15,00 €). L’écran des types de public saisit et affiche des euros : le libellé est « Prix d'abonnement (€) », l’affichage divise la valeur stockée par 100, et l’enregistrement multiplie le montant saisi par 100. Un appel API ou un `INSERT` dans `public_types.subscription_price` doit envoyer les centimes (`1500` pour 15,00 €).
+Les montants d’abonnement sont saisis en euros. Le logiciel les conserve en centimes. Le tarif livré pour l’adulte est 15,00 €. Voir aussi [Relances et amendes](/fr/documentation/reminders-fines/).
 
-Un type de public `child` ne peut pas être inscrit sans responsable légal (`user_guardians`). Le sélecteur est sur la fiche. Le responsable ne peut pas lui-même être `child` ou `school`.
+Un enfant ne peut pas être inscrit sans responsable légal. Le sélecteur est sur la fiche. Le responsable ne peut pas lui-même être un enfant ou un scolaire.
 
-Pour un compte `reader`, le type de public est dérivé de la date de naissance et des bornes `age_min` / `age_max`. Aucune borne ne correspond : la réponse est `no_public_type_for_age`. Un type de compte personnalisé n’est pas dérivé ainsi.
+Pour un compte lecteur, le type de public est déduit de la date de naissance et des bornes d’âge. Si aucune borne ne correspond, l’enregistrement est refusé. Un type de compte personnalisé n’est pas déduit ainsi.
 
-L’onglet Amendes de la fiche liste les charges lorsque le droit de lecture sur les lecteurs est présent. Voir [Relances et amendes](/fr/documentation/reminders-fines/).
+L’onglet Amendes de la fiche liste les charges lorsque le droit de lire les lecteurs est présent.
 
-Une carte déclarée perdue (`users.card_lost`) bloque le prêt. Le remplacement retire l’ancien numéro. Le détail des routes est dans [Prêts et retours](/fr/documentation/circulation/).
+Une carte déclarée perdue bloque le prêt. Le remplacement retire l’ancien numéro et en donne un nouveau. Ces deux actions n’ont pas de bouton dans l’interface de cette version : le personnel les prépare avec l’administrateur, le détail est dans la [référence d’API](/fr/dev/api/). Les retours et le paiement des amendes restent possibles avec une carte perdue. Voir [Prêts et retours](/fr/documentation/circulation/).
 
 ## Ce que le lecteur voit
 
-Connecté, le lecteur ouvre :
+Une fois connecté, le lecteur ouvre :
 
-- Mes emprunts, `/my-loans` : prêts en cours, prolongation lorsque la fenêtre de renouvellement le permet ;
-- Mes réservations, `/my-holds`, si le droit de réservation du compte est `own` ou plus ;
-- Mon profil, `/profile` : coordonnées, langue, mot de passe, suggestions d’achat, préférence d’historique.
+- Mes emprunts : prêts en cours, prolongation lorsque la fenêtre le permet ;
+- Mes réservations, si le compte peut gérer les siennes ;
+- Mon profil : coordonnées, langue, mot de passe, suggestions d’achat, préférence d’historique.
 
-L’historique de prêts (`GET /api/v1/users/{id}/history`) est lisible par le titulaire ou le personnel. La préférence qui le conserve ou non se modifie par le titulaire ou un administrateur.
+L’historique de prêts est lisible par le titulaire ou le personnel. La préférence qui le conserve ou non se modifie par le titulaire ou un administrateur.
 
 ## Anonymiser
 
-L’action « Anonymiser pour les stats » appelle `DELETE /api/v1/users/{id}`. Le détail des colonnes effacées et de ce qui reste pour les statistiques est dans [Administration](/fr/documentation/administration/).
+L’action « Anonymiser pour les stats » retire l’identité et garde des dimensions non nominatives pour les statistiques. Le détail de ce qui disparaît et de ce qui reste est dans [Administration](/fr/documentation/administration/). L’action est irréversible.

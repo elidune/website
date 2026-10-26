@@ -16,6 +16,7 @@ interface Props {
 const { locale, kind, docSlug, active = true } = Astro.props;
 const home = pathFor(locale, 'home');
 const docsCurrent = kind === 'docs-index' || kind === 'doc';
+const devCurrent = kind === 'dev-index' || kind === 'dev-doc';
 ---
 
 <header class="top" data-pagefind-ignore>
@@ -53,6 +54,7 @@ const docsCurrent = kind === 'docs-index' || kind === 'doc';
       <a href={`${home}#projet`}>{t(locale, 'nav.project')}</a>
       <a href={pathFor(locale, 'features')} aria-current={kind === 'features' ? 'page' : undefined}>{t(locale, 'nav.features')}</a>
       <a href={pathFor(locale, 'docs-index')} aria-current={docsCurrent ? 'page' : undefined}>{t(locale, 'nav.docs')}</a>
+      <a href={pathFor(locale, 'dev-index')} aria-current={devCurrent ? 'page' : undefined}>{t(locale, 'nav.dev')}</a>
       <a href={pathFor(locale, 'contribute')} aria-current={kind === 'contribute' ? 'page' : undefined}>{t(locale, 'nav.contribute')}</a>
       <div class="nav-extra">
         <a class="btn btn-ghost" href={demoUrl}>{t(locale, 'nav.demo')}</a>

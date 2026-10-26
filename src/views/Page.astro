@@ -3,6 +3,8 @@ import type { Locale } from '../i18n/locales';
 import type { PageKind } from '../i18n/routes';
 import Changelog from './Changelog.astro';
 import Contribute from './Contribute.astro';
+import DevPage from './DevPage.astro';
+import DevIndex from './DevIndex.astro';
 import DocPage from './DocPage.astro';
 import DocsIndex from './DocsIndex.astro';
 import Features from './Features.astro';
@@ -20,6 +22,8 @@ const { locale, kind, docSlug } = Astro.props;
 {kind === 'features' && <Features locale={locale} />}
 {kind === 'docs-index' && <DocsIndex locale={locale} />}
 {kind === 'doc' && docSlug && <DocPage locale={locale} slug={docSlug} />}
+{kind === 'dev-index' && <DevIndex locale={locale} />}
+{kind === 'dev-doc' && docSlug && <DevPage locale={locale} slug={docSlug} />}
 {kind === 'contribute' && <Contribute locale={locale} />}
 {kind === 'changelog' && <Changelog locale={locale} />}
 {kind === 'legal' && <Legal locale={locale} />}

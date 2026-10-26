@@ -10,6 +10,8 @@ const siteOrigin = 'https://elidune.fr';
 const queue = ['/', '/fr/', '/en/', '/robots.txt', '/sitemap-index.xml'].map((path) => origin + path);
 const seen = new Set();
 const failures = [];
+const warnings = [];
+let skippedEditors = 0;
 
 function localize(href) {
   if (href.startsWith(siteOrigin)) return origin + href.slice(siteOrigin.length);
@@ -36,6 +38,34 @@ function extract(html, pageUrl) {
   return found;
 }
 
+/**
+ * GitHub editor URLs are not documents. /edit/ answers 404 until the file is on the
+ * default branch, and both /edit/ and /new/ return 429 when CI fetches one per page.
+ */
+function isGithubEditorLink(href) {
+  let url;
+  try {
+    url = new URL(href);
+  } catch {
+    return false;
+  }
+  const host = url.hostname.toLowerCase();
+  if (host !== 'github.com' && host !== 'www.github.com') return false;
+  const parts = url.pathname.split('/').filter(Boolean);
+  return parts.length >= 4 && (parts[2] === 'edit' || parts[2] === 'new');
+}
+
+function retryDelayMs(response, attempt) {
+  const header = response?.headers?.get('retry-after');
+  if (header) {
+    const seconds = Number(header);
+    if (Number.isFinite(seconds) && seconds >= 0) return Math.min(seconds * 1000, 20000);
+    const when = Date.parse(header);
+    if (!Number.isNaN(when)) return Math.min(Math.max(when - Date.now(), 0), 20000);
+  }
+  return Math.min(1500 * 2 ** (attempt - 1), 20000);
+}
+
 /** Blob HTML pages answer 503 from GitHub-hosted runners. The raw file is the existence check. */
 function probeUrl(href) {
   let url;
@@ -53,11 +83,14 @@ function probeUrl(href) {
 
 async function checkExternal(url) {
   const target = probeUrl(url);
-  const attempts = 3;
+  const maxAttempts = 5;
   let last = 'error';
-  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+  let rateLimited = false;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 20000);
+    let waitMs = 0;
+    let stop = false;
     try {
       const response = await fetch(target, {
         redirect: 'follow',
@@ -66,16 +99,31 @@ async function checkExternal(url) {
       });
       if (response.status < 400) return;
       last = String(response.status);
-      const retry = response.status === 429 || response.status >= 500;
-      if (!retry) break;
+      if (response.status === 429) {
+        rateLimited = true;
+        waitMs = retryDelayMs(response, attempt);
+        stop = attempt === maxAttempts;
+      } else if (response.status >= 500) {
+        waitMs = 1500 * attempt;
+        stop = attempt >= 3;
+      } else {
+        stop = true;
+      }
     } catch (error) {
       last = error instanceof Error ? error.message : 'error';
+      waitMs = 1500 * attempt;
+      stop = attempt >= 3;
     } finally {
       clearTimeout(timer);
     }
-    if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, 1500 * attempt));
+    if (stop) break;
+    await new Promise((resolve) => setTimeout(resolve, waitMs));
   }
   const where = target === url ? url : `${url} (${target})`;
+  if (rateLimited && last === '429') {
+    warnings.push(`${where} -> 429 after ${maxAttempts} attempts; left as a warning`);
+    return;
+  }
   failures.push(`${where} -> ${last}`);
 }
 
@@ -106,15 +154,20 @@ while (queue.length) {
       const local = url.href;
       if (!seen.has(local)) queue.push(local);
     } else if (url.protocol === 'http:' || url.protocol === 'https:') {
-      if (!seen.has(url.href)) {
-        seen.add(url.href);
-        await checkExternal(url.href);
+      if (seen.has(url.href)) continue;
+      seen.add(url.href);
+      if (isGithubEditorLink(url.href)) {
+        skippedEditors += 1;
+        continue;
       }
+      await checkExternal(url.href);
     }
   }
 }
 
 server.close();
+if (skippedEditors) console.log(`skipped ${skippedEditors} GitHub editor links`);
+if (warnings.length) console.warn(warnings.join('\n'));
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);

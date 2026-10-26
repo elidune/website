@@ -4,7 +4,7 @@ import type { MessageKey } from '../i18n/ui';
 import { docSlugs, type DocSlug } from '../i18n/routes';
 import { websiteRepoUrl } from './site';
 
-export const docSectionOrder = ['install', 'start', 'features', 'admin', 'help', 'dev'] as const;
+export const docSectionOrder = ['install', 'start', 'features', 'admin', 'help'] as const;
 export type DocSection = (typeof docSectionOrder)[number];
 
 export const docSectionLabel: Record<DocSection, MessageKey> = {
@@ -13,7 +13,6 @@ export const docSectionLabel: Record<DocSection, MessageKey> = {
   features: 'docs.section.features',
   admin: 'docs.section.admin',
   help: 'docs.section.help',
-  dev: 'docs.section.dev',
 };
 
 export type DocHit = {
@@ -59,9 +58,10 @@ export async function getDoc(locale: Locale, slug: string): Promise<DocHit | nul
   return docs.find((doc) => doc.slug === slug) ?? null;
 }
 
-export function editDocUrl(locale: Locale, slug: string, translated: boolean): string {
+export function editDocUrl(locale: Locale, slug: string, translated: boolean, area: 'docs' | 'dev' = 'docs'): string {
+  const folder = area === 'dev' ? 'dev' : 'docs';
   if (translated) {
-    return `${websiteRepoUrl}/edit/main/src/content/docs/${locale}/${slug}.md`;
+    return `${websiteRepoUrl}/edit/main/src/content/${folder}/${locale}/${slug}.md`;
   }
-  return `${websiteRepoUrl}/new/main/src/content/docs/${locale}?filename=${slug}.md`;
+  return `${websiteRepoUrl}/new/main/src/content/${folder}/${locale}?filename=${slug}.md`;
 }

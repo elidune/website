@@ -1,5 +1,6 @@
 ---
 import type { Locale } from '../i18n/locales';
+import { pathFor } from '../i18n/routes';
 import { t } from '../i18n/ui';
 import { issuesUrl, softwareRepoUrl } from '../lib/site';
 
@@ -44,6 +45,7 @@ const tags = ['Rust', 'Axum', 'sqlx', 'PostgreSQL', 'Redis', 'Meilisearch', 'Rea
         <div class="cta" style="margin-top:1.1rem">
           <a class="btn btn-primary" href={issuesUrl}>{t(locale, 'contrib.issues')}</a>
           <a class="btn btn-ghost" href={softwareRepoUrl}>{t(locale, 'contrib.source')}</a>
+          <a class="btn btn-ghost" href={pathFor(locale, 'dev-index')}>{t(locale, 'contrib.dev')}</a>
         </div>
       </article>
     </div>

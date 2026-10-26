@@ -496,6 +496,11 @@ footer a:hover { color: var(--accent-text); text-decoration: underline; }
 .banner a { color: var(--accent-text); font-weight: 600; }
 
 .prose { max-width: 68ch; }
+.prose-wide { max-width: 72rem; }
+.prose table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.prose th, .prose td { border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; padding: 0.4rem 0.5rem; overflow-wrap: anywhere; }
+.prose th { color: var(--text); font-weight: 650; }
+.prose pre { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 100%; }
 .prose h2 { font-size: 1.45rem; margin: 1.6em 0 0.4em; }
 .prose h3 { font-size: 1.15rem; margin: 1.3em 0 0.3em; }
 .prose p, .prose li { color: var(--text-2); }

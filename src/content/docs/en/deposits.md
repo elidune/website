@@ -1,6 +1,6 @@
 ---
 title: Deposits
-description: Batches received from another institution, lenders, MARC import, return, and losses.
+description: Batches received from another institution, lenders, import, return, and losses.
 navTitle: Deposits
 order: 33
 section: features
@@ -8,86 +8,58 @@ draft: false
 locale: en
 ---
 
-A deposit is a set of copies that remain the property of a lender. The module follows the `deposits` feature (enabled by default). The **Deposits** menu (`/deposits`) requires the internal catalogue and read rights on copies. Writing (create, return, close) requires write rights on copies.
+A deposit is a set of copies that remain the property of a lender. The **Deposits** menu appears when the module is on and the account can read the catalogue. Creating a batch, starting a return, or closing it requires the right to edit copies.
 
-<figure>
-<picture>
-<source srcset="/screens/en/dark/deposits.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/en/light/deposits.webp" alt="Deposit batch list, light theme." width="1440" height="900" />
-</picture>
-</figure>
-
-Screenshot: deposit batches (`deposits`).
+![Deposit batch list, light theme.](screen:deposits "Each batch shows the lender and the state of the deposit.")
 
 ## Lenders
 
-The Lenders tab is `/deposits?tab=lenders`. A lender has a name (unique, at most 200 characters), a contact, notes, and an optional replacement rate in euro cents (`replacementRateCents`, strictly positive, or absent). Archiving is refused while any batch of that lender is not closed (`lender_has_active_batches`).
+The Lenders tab records a unique name (200 characters at most), a contact, notes, and, optionally, a replacement rate that must be strictly positive. Archiving a lender is refused while one of their batches is not closed.
 
 ## Batches
 
-A batch (`deposit_batches`) has a reference unique for that lender, a host site, an arrival date, and an optional return date. With no return date, the deposit is permanent. A return date, when set, is on or after the arrival date.
+A batch carries a reference that is unique for that lender, a host site, an arrival date, and an optional return date. With no return date, the deposit is permanent. If a return date is entered, it is at least the arrival date.
 
-| Status | Meaning |
+| State | Meaning |
 | --- | --- |
-| `active` | The batch circulates |
-| `returning` | Return to the lender has started |
-| `closed` | The batch is closed and the copies are archived |
+| Circulating | The batch can be loaned |
+| Return in progress | The return to the lender has started |
+| Closed | The batch is finished, and the copies are archived |
 
-Creating a batch stores it as `active`. Changing the batch site does not move copies already attached.
+Creating a batch places it in circulation. Changing the batch site does not move copies already attached.
 
-## MARC import in deposit mode
+## Import in deposit mode
 
-ISO 2709 or MARCXML import is at `/biblios?tab=import` (`/import-iso` redirects there). **Deposit** mode requires an `active` batch and the `importIso` feature. **Own stock** mode requires a site.
+A MARC file is imported from the catalogue, on the import tab. **Deposit** mode requires a batch that is still circulating and the import module. **Own stock** mode requires a site.
 
-When the ISBN already exists, the import attaches copies and does not rewrite the record. The lender barcode is kept in `lender_barcode`. If it collides with an active desk barcode, the server can relabel (a new local barcode), overwrite, or ignore. The default, with no instruction, is relabel. A copy already billed as lost (`wasLost`) refuses the import (`deposit_item_was_lost`).
+When the ISBN is already present, the import adds copies without rewriting the record. The lender’s barcode is kept. If it collides with a desk barcode that is already active, the software can relabel (a new local code), overwrite, or ignore. With no instruction, it relabels. A copy already billed as lost refuses the import.
 
-Z39.50 search does not create a deposit copy: it leaves `deposit_batch_id` empty.
+Z39.50 search does not create a deposit copy.
 
 ## Circulating a deposited copy
 
-A deposited copy has `deposit_batch_id` set. The others are own stock.
-
-- A loan or renewal due date is capped at the batch `return_due_on`. The interface shows that cap.
-- If that date is today or already past, a new checkout returns 422 `deposit_return_due`. That refusal cannot be forced.
-- A renewal that would not extend the due date returns `deposit_renewal_no_extension` or `deposit_return_due`.
-- A `returning` or `closed` batch, or one whose return date has passed, does not take a new hold (`deposit_batch_returning`).
-- Weeding a deposited copy returns `deposit_item_not_owned`.
-- A copy already marked sent back (`deposit_returned_at`) refuses a new checkout: `deposit_item_returned_to_lender`. That refusal cannot be forced.
-- Removing the copy from the catalogue (`DELETE /api/v1/items/{id}`) does not record a return to the lender. The detail is in [Items](/en/docs/copies/).
+- The due date of a loan or a renewal does not pass the batch return date. The screen says so.
+- If that date is today or already past, a new loan is refused. The refusal cannot be forced.
+- A renewal that would not move the due date forward is refused.
+- A batch being returned, closed, or past its return date does not accept a new hold.
+- A deposited copy cannot be weeded.
+- A copy already marked as sent back to the lender refuses a new loan. The refusal cannot be forced.
+- Removing the copy from the catalogue does not record a return to the lender. See [Copies](/en/docs/copies/).
 
 ## Return to the lender
 
-1. **Start the return** moves the batch from `active` to `returning` and detaches holds on the batch copies. Cancelling the return does not restore those holds.
-2. Scan-out (`POST /api/v1/deposit-batches/{id}/scan-out`, or the global scan) requires a `returning` batch. It stores `deposit_returned_at`. A copy still on loan returns 422 `deposit_item_on_loan`: check it in at the desk first. A desk check-in while the batch is `returning` also marks the copy as sent back, unless it is lost.
-3. **Close** is possible only from `returning`, and only when no loan is still open (`deposit_batch_has_active_loans`). Scanned copies count as returned. The others, including a lost copy that was not scanned, count as missing. Closing archives the batch copies.
+1. **Start the return** moves the batch from “circulating” to “return in progress” and detaches holds on the batch’s copies. Those holds are not restored if the return is cancelled.
+2. Scan-out requires a batch whose return is in progress. It marks the copy as sent back. A copy still on loan is refused: check it in at the desk first. A desk return while the batch is being returned also marks the copy as sent back, unless it is lost.
+3. **Close** is possible only during the return, and only when no loan is still open. Scanned copies count as sent back. The others, including a lost copy that was not scanned, count as missing. Closing archives the copies in the batch. It ends circulation for those copies.
 
-The close report counts copies. It does not include a patron name.
+The closing report counts copies. It does not include a patron’s name.
 
 ## Losses to report
 
-Marking a deposited copy lost or damaged creates a replacement or damage fine and an audit event `deposit_item_lost`. The amount follows, in order, the lender rate, the copy price when it is positive, then an amount entered by staff. With none of those, the response is `deposit_replacement_amount_required`.
+Declaring a deposited copy lost or damaged creates a replacement or damage fine. The amount follows, in order, the lender’s rate, the copy price when it is positive, then an amount that was typed. With none of those amounts, the save is refused.
 
-`GET /api/v1/deposit-losses` lists those copies. By default, only the ones not yet reported to the lender (`notified=false`). `POST /api/v1/items/{id}/deposit-loss-notified` stores the report date. A second call returns `deposit_loss_already_notified`.
+The desk can declare the loss. The list of losses still to report to the lender, and the button that records that report, are not in the interface of this version. Staff therefore keep their own note until that screen exists. The technical detail is in the [API reference](/en/dev/api/).
 
-The desk declares the loss. The “losses to report” list and the notification action are not in the interface of this version: those two routes stay an API call.
+## Copies filed in the wrong place
 
-## The `reclassify-deposits` command
-
-The server binary reclassifies copies whose lender had been stored as a site.
-
-```bash
-elidune-server reclassify-deposits \
-  --config config/default.toml \
-  --lender 12 \
-  --batch-reference "CITYLIB-2027-SPRING" \
-  --received-on 2027-03-01 \
-  --return-due-on 2027-09-01 \
-  --site 3 \
-  --from-site 41
-```
-
-Without `--apply`, the transaction is rolled back after the report. `--from-site` and `--barcodes` are mutually exclusive, and `--from-site` must differ from `--site`. `--return-due-on` is optional when the batch is created (permanent deposit). An existing `active` batch for that reference is reused. Any other status is refused.
-
-Per-copy refusals, with nothing written: `barcode_unknown`, `item_archived`, `item_in_other_batch`, `item_in_transit`. `already_reclassified` is a skip, without a second audit row.
-
-`docs/README-deposit-reclassify.md` in the software repository still names `--from-source` and `items.source_id`. The binary in this version expects `--from-site` and updates `items.site_id`. The JSON report uses `remaining_on_old_site`.
+If copies were shelved under a place that was really the lender, an administrator can reclassify them into a batch. The command and its safeguards are in [Deployment](/en/dev/deployment/). Without an explicit confirmation, the operation only prints a report and writes nothing.

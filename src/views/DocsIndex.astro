@@ -23,12 +23,13 @@ const groups = groupDocs(await listDocs(locale));
   indexable={true}
 >
   <section>
-    <div class="wrap" data-pagefind-body data-pagefind-filter={`locale:${locale}`} data-pagefind-meta={`title:${t(locale, 'meta.docs.title')}`}>
+    <div class="wrap" data-pagefind-body data-pagefind-filter={`bundle:${locale}-docs`} data-pagefind-meta={`title:${t(locale, 'meta.docs.title')}`}>
       <p class="kicker">{t(locale, 'docs.kicker')}</p>
       <h1>{t(locale, 'docs.title')}</h1>
       <p class="sub">{t(locale, 'docs.sub')}</p>
       <Search locale={locale} />
       <DocsCards locale={locale} level={2} />
+      <p><a href={pathFor(locale, 'dev-index')}>{t(locale, 'docs.toDev')}</a></p>
       <h2 style="margin-top:2.5rem">{t(locale, 'docs.all')}</h2>
       {
         groups.map((group) => (

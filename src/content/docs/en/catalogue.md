@@ -1,6 +1,6 @@
 ---
 title: Catalogue
-description: Bibliographic records, search, Z39.50, and MARC import in Elidune.
+description: Records, search, Z39.50, and MARC import, for library staff.
 navTitle: Catalogue
 order: 31
 section: features
@@ -8,47 +8,44 @@ draft: false
 locale: en
 ---
 
-A **biblio** describes a work or an edition. An **item** is a physical object attached to that biblio. Staff catalogue in `/biblios`. Signed-in patrons use `/catalog`. The public catalogue on `/` needs no account. See [OPAC](/en/docs/opac/).
+A **record** describes a work or an edition. A **copy** is the physical object attached to that record. Staff catalogue from the Cataloguing menu. A signed-in patron uses the catalogue in their own area. The catalogue on the home page needs no account. See [OPAC](/en/docs/opac/).
 
-<figure>
-<picture>
-<source srcset="/screens/en/dark/catalogue.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/en/light/catalogue.webp" alt="Catalogue list, light theme." width="1440" height="900" />
-</picture>
-</figure>
+![Catalogue list, light theme.](screen:catalogue "The catalogue list shows whether each title is available.")
 
-Screenshot: catalogue list (`catalogue`). The record screen has a separate shot (`record`). MARC import in deposit mode is described in [Deposits](/en/docs/deposits/).
+![A title record, light theme.](screen:record "The record lists the copies and their state.")
+
+MARC import of deposited documents is described in [Deposits](/en/docs/deposits/).
 
 ## Create and edit
 
-`/biblios/new` creates a biblio. `/biblios/{id}` shows it, `/biblios/{id}/edit` edits it. Write access on documents (`items_rights` = write) is required. Seeded `librarian` and `admin` accounts have it.
+Creating a record, opening it, or editing it requires the right to edit the catalogue. Librarian and administrator accounts have it in the shipped set.
 
-Usual fields: titles, authors, ISBN, collection ISSN, media type, audience, Dewey, series, collection. An ISBN that already exists returns a confirmation request (`duplicate_isbn_needs_confirmation`) before the existing biblio is replaced.
+Usual fields: titles, authors, ISBN, collection ISSN, document type, audience, Dewey number, series, collection. An ISBN that is already known asks for confirmation before the existing record is overwritten.
 
-Media types the API accepts, in camelCase: `printedText`, `comics`, `periodic`, `video`, `videoDvd`, `videoTape`, `audio`, `audioMusic`, `audioMusicCd`, `audioMusicTape`, `audioNonMusic`, `audioNonMusicCd`, `audioNonMusicTape`, `cdRom`, `images`, `multimedia`, `unknown`. Short legacy codes (`b`, `vd`, `p`, and the others) are still accepted on read.
+The document types on offer cover the book, the comic, the periodical, video and DVD, video tape, music and other sound recordings, the CD-ROM, images, multimedia, and an unknown type. Old short codes remain readable.
 
-Series and collections have their own routes (`/api/v1/series`, `/api/v1/collections`): name, secondary titles, ISSN for a collection.
+Series and collections have their own record: a name, secondary titles, and an ISSN for a collection.
 
-Deleting a biblio needs the same write right. It is possible only when no copy and no hold remain (`biblio_has_items`, `biblio_has_holds`). `force` does not lift those refusals.
+Deleting a record requires the same write right. Deletion is refused while a copy or a hold remains. Forcing does not lift that refusal.
 
-CSV export: `GET /api/v1/biblios/export.csv`.
+A spreadsheet export of the catalogue is offered to staff allowed to read the catalogue.
 
 ## Search
 
-Staff search in `/biblios`. Meilisearch (default index name `items`) serves search when it is reachable. Otherwise the API falls back to PostgreSQL full text. A full reindex is administrator-only: `POST /api/v1/admin/reindex-search`, also offered in Settings, Server, Catalog tab.
+Staff search in the catalogue list. The search engine answers when it can be reached. Otherwise search uses the database. A full reindex is reserved for an administrator: Settings, Server, Catalog tab.
 
 ## Z39.50
 
-`/z3950` queries servers saved in Settings. A hit can be imported as a biblio (`POST /api/v1/z3950/import`). Responses are cached in Redis. The default TTL is `ELIDUNE_REDIS__Z3950_CACHE_TTL_SECONDS` = 604800 (7 days).
+The search screen queries the servers saved in Settings. A hit can be imported as a record. Responses are cached for seven days by default.
 
-Each server has a host, a port, a database, and an enabled flag. The form is the “Z39.50 servers” tab.
+Each server has an address, a port, a database, and an on/off switch. The form is on the “Z39.50 servers” tab, visible when the module is on.
 
 ## MARC import
 
-`/import-iso` uploads a MARC file. Related routes are `POST /api/v1/biblios/load-marc` (read) and `POST /api/v1/biblios/import-marc-batch` (write). Loaded batches are read back with `GET /api/v1/biblios/list-marc-batches` and `GET /api/v1/biblios/marc-batch/{id}`.
+The import screen sends an ISO 2709 or MARCXML file. Loading the file in order to read it back requires catalogue read rights. Saving the batch into the catalogue requires write rights. Batches already loaded can be opened again.
 
-The MARC translator lives in `server/src/marc/`. Media type is taken from Leader position 6.
+The document type is taken from the MARC record. Deposit mode, which attaches copies to a batch received from a lender, is described in [Deposits](/en/docs/deposits/).
 
-## Record page
+## Record screen
 
-The record lists items, their availability, and the biblio hold queue (`GET /api/v1/biblios/{id}/holds`). Adding an item is described in [Items](/en/docs/copies/).
+The screen lists the copies, their availability, and the hold queue for the record. Adding a copy is described in [Copies](/en/docs/copies/).

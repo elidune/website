@@ -8,60 +8,53 @@ draft: false
 locale: fr
 ---
 
-Un lieu (rayon, annexe, bibliothèque du réseau) est une ligne de la table `sites`. L’API est `/api/v1/sites`.
+Un lieu (rayon, annexe, bibliothèque du réseau) est un site. Le module des transits peut être coupé. Sans lui, les déplacements entre sites ne sont pas proposés.
 
-<figure>
-<picture>
-<source srcset="/screens/fr/dark/transits.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/fr/light/transits.webp" alt="Liste des transits, thème clair." width="1440" height="900" />
-</picture>
-</figure>
-
-Capture : transits (`transits`).
+![Liste des transits, thème clair.](screen:transits "Les exemplaires en déplacement vers un site de retrait.")
 
 ## Enregistrer les lieux
 
-Paramètres, onglet Gestion des sites (`/settings?tab=sites`), compte `admin` :
+Paramètres, onglet Gestion des sites, compte administrateur :
 
-- créer un site (nom, et éventuellement site par défaut). Sur une base neuve, le premier enregistrement après le site `MyLibrary` échoue une fois (séquence non alignée, voir [Installation](/fr/documentation/installation/)) ;
+- créer un site (un nom, et éventuellement le site par défaut) ;
 - renommer ;
-- archiver (`POST /api/v1/sites/{id}/archive`) ;
-- fusionner au moins deux sites (`POST /api/v1/sites/merge`) : les exemplaires sont réaffectés, les anciens sites sont archivés.
+- archiver ;
+- fusionner au moins deux sites : les exemplaires sont réaffectés, les anciens sites sont archivés.
 
-L’exemplaire garde `siteId` : le lieu où il est rangé. Le catalogue public affiche ce nom. Un prêt enregistre aussi le site du guichet (`loans.site_id`). Vide, les statistiques et le calendrier utilisent le site par défaut, pas le site de l’exemplaire.
+Sur une installation actuelle, le premier site ajouté après le site d’origine s’enregistre du premier coup. Sur une base plus ancienne qui n’a pas reçu la correction des numéros, ce premier enregistrement peut échouer une fois : enregistrer à nouveau. Voir [Installation](/fr/documentation/installation/).
+
+L’exemplaire garde le lieu où il est rangé. Le catalogue public affiche ce nom. Un prêt enregistre aussi le site du guichet. S’il est vide, les statistiques et le calendrier utilisent le site par défaut, pas le site de l’exemplaire.
 
 ## Réservation et retrait
 
-La réservation porte `pickupSiteId`, identifiant d’un site. Au moment de l’affectation :
+La réservation porte un site de retrait. Au moment de l’affectation :
 
-- exemplaire déjà sur ce site : statut `ready` ;
-- exemplaire ailleurs : ligne de transit vers ce site. La réservation ne devient `ready` qu’à la réception.
+- exemplaire déjà sur ce site : la réservation devient prête ;
+- exemplaire ailleurs : un transit part vers ce site. La réservation ne devient prête qu’à la réception.
 
-`/transits` suit ces mouvements. Annuler la réservation pendant le transit ouvre un transit de retour vers le lieu d’origine.
+L’écran des transits suit ces mouvements. Annuler la réservation pendant le transit ouvre un transit de retour vers le lieu d’origine.
 
-### Statuts et actions
+### États et actions
 
-`TransitStatus` est stocké en minuscules. Le JSON et l’interface utilisent le camelCase pour `inTransit`.
+| État | Sens |
+| --- | --- |
+| Demandé | Le déplacement est prévu, l’exemplaire n’est pas encore parti |
+| En transit | L’exemplaire est en route. Il n’est pas prêtable |
+| Réceptionné | L’exemplaire est arrivé |
+| Annulé | Le déplacement est abandonné |
 
-| Stocké | Interface | Libellé |
-| --- | --- | --- |
-| `requested` | `requested` | Demandé |
-| `in_transit` | `inTransit` | En transit |
-| `received` | `received` | Réceptionné |
-| `cancelled` | `cancelled` | Annulé |
+L’écran filtre par en cours, demandé, en transit, ou tous.
 
-L’écran `/transits` filtre par En cours, Demandé, En transit ou Tous. Un exemplaire `in_transit` n’est pas prêtable.
-
-| Action | Libellé | Condition |
-| --- | --- | --- |
-| Démarrer le transit | « Démarrer le transit » | Le bouton apparaît pour une réservation `pending` qui a un site de retrait et aucun transit actif. Il est masqué si l’exemplaire choisi est déjà sur ce site. Le serveur accepte aussi une réservation `to_pick` : il la repasse alors à `pending` |
-| Expédier immédiatement | « Expédier immédiatement (en transit) » | Case au démarrage (`ship: true`). Le transit est créé directement en `in_transit`, sans passer par `requested` |
-| Expédier | « Expédier » | Statut stocké `requested`. Le transit passe à `in_transit` |
-| Réceptionner | « Réceptionner » | Statut `in_transit`. L’exemplaire prend le site de destination. Si le transit est lié à une réservation `pending`, cette réservation devient `ready` |
-| Annuler le transit | « Annuler le transit » | Statut `requested` ou `in_transit`. La réservation liée reste. Pour un transit déjà `in_transit`, l’interface envoie `reverse: true` : le serveur ouvre un transit `requested` de la destination vers l’origine, sans réservation attachée |
+| Action | Condition |
+| --- | --- |
+| Démarrer le transit | Le bouton apparaît pour une réservation en attente qui a un site de retrait et aucun transit actif. Il est masqué si l’exemplaire choisi est déjà sur ce site. Une réservation à prélever est aussi acceptée : elle repasse alors en attente |
+| Expédier immédiatement | Case au démarrage. Le transit est créé directement en route, sans passer par « demandé » |
+| Expédier | L’état demandé passe à « en transit » |
+| Réceptionner | L’exemplaire est en route. Il prend le site de destination. Si le transit est lié à une réservation en attente, cette réservation devient prête |
+| Annuler le transit | État demandé ou en route. La réservation liée reste. Pour un transit déjà en route, l’interface demande un retour : un nouveau transit est ouvert de la destination vers l’origine, sans réservation attachée |
 
 La liste de prélèvement filtre par le site actuel de l’exemplaire.
 
 ## Règles communes
 
-Les plafonds de prêt, les types de public et les amendes sont ceux de l’installation, pas un barème par site. Un exemplaire `in_transit` n’est pas prêtable. Un transit `requested` bloque aussi le prêt : `force` ne lève pas ce blocage (`business_rule_violation`).
+Les plafonds de prêt, les types de public et les amendes sont ceux de l’installation, pas un barème par site. Un exemplaire en transit n’est pas prêtable. Un transit seulement demandé bloque aussi le prêt. Forcer ne lève pas ce blocage.

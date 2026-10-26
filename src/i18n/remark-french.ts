@@ -16,7 +16,12 @@ function walk(node: MdNode): void {
 export function remarkFrenchTypography() {
   return (tree: MdNode, file: { path?: string; history?: string[] }) => {
     const source = String(file.path ?? file.history?.[0] ?? '');
-    if (!source.includes('/docs/fr/') && !source.includes('\\docs\\fr\\')) return;
+    const french =
+      source.includes('/docs/fr/') ||
+      source.includes('/dev/fr/') ||
+      source.includes('\\docs\\fr\\') ||
+      source.includes('\\dev\\fr\\');
+    if (!french) return;
     walk(tree);
   };
 }

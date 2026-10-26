@@ -1,6 +1,6 @@
 ---
 title: Catalogue
-description: Notices bibliographiques, recherche, Z39.50 et import MARC dans Elidune.
+description: Notices, recherche, Z39.50 et import MARC, pour le personnel de bibliothèque.
 navTitle: Catalogue
 order: 31
 section: features
@@ -8,47 +8,44 @@ draft: false
 locale: fr
 ---
 
-Une **notice** (biblio) décrit une œuvre ou une édition. Un **exemplaire** (item) est un objet physique rattaché à cette notice. Le personnel catalogue dans `/biblios`. Les lecteurs consultent `/catalog` une fois connectés, ou le catalogue public de la page `/` sans compte. Voir [OPAC](/fr/documentation/opac/).
+Une **notice** décrit une œuvre ou une édition. Un **exemplaire** est l’objet physique rattaché à cette notice. Le personnel catalogue dans le menu Catalogage. Un lecteur connecté consulte le catalogue de son espace. Le catalogue de la page d’accueil ne demande pas de compte. Voir [OPAC](/fr/documentation/opac/).
 
-<figure>
-<picture>
-<source srcset="/screens/fr/dark/catalogue.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/fr/light/catalogue.webp" alt="Liste du catalogue, thème clair." width="1440" height="900" />
-</picture>
-</figure>
+![Liste du catalogue, thème clair.](screen:catalogue "La liste du catalogue indique la disponibilité de chaque titre.")
 
-Capture : liste du catalogue (`catalogue`). La fiche notice a une capture distincte (`record`). L’import MARC en mode dépôt est décrit dans [Dépôts](/fr/documentation/deposits/).
+![Notice d’un titre, thème clair.](screen:record "La notice liste les exemplaires et leur état.")
+
+L’import MARC de documents déposés est décrit dans [Dépôts](/fr/documentation/deposits/).
 
 ## Créer et modifier
 
-`/biblios/new` crée une notice. `/biblios/{id}` l’affiche, `/biblios/{id}/edit` la modifie. Le droit d’écriture sur les documents (`items_rights` = écriture) est requis. Les comptes `librarian` et `admin` l’ont dans le jeu initial.
+Créer une notice, l’ouvrir, ou la modifier, demande le droit de modifier le catalogue. Les comptes bibliothécaire et administrateur l’ont dans le jeu livré.
 
-Champs usuels : titres, auteurs, ISBN, ISSN de collection, type de média, public, Dewey, série, collection. Un ISBN déjà connu renvoie une demande de confirmation (`duplicate_isbn_needs_confirmation`) avant d’écraser la notice existante.
+Champs usuels : titres, auteurs, ISBN, ISSN de collection, type de document, public, indice Dewey, série, collection. Un ISBN déjà connu demande une confirmation avant d’écraser la notice existante.
 
-Types de média reconnus par l’API, en camelCase : `printedText`, `comics`, `periodic`, `video`, `videoDvd`, `videoTape`, `audio`, `audioMusic`, `audioMusicCd`, `audioMusicTape`, `audioNonMusic`, `audioNonMusicCd`, `audioNonMusicTape`, `cdRom`, `images`, `multimedia`, `unknown`. Des codes courts historiques (`b`, `vd`, `p`, etc.) sont encore acceptés à la lecture.
+Les types de document proposés couvrent le livre, la bande dessinée, le périodique, la vidéo et le DVD, la cassette vidéo, la musique et les autres enregistrements sonores, le cédérom, les images, le multimédia, et un type inconnu. D’anciens codes courts restent lisibles.
 
-Séries et collections ont leurs propres routes (`/api/v1/series`, `/api/v1/collections`) : nom, titres secondaires, ISSN pour une collection.
+Séries et collections ont leur propre fiche : nom, titres secondaires, et un ISSN pour une collection.
 
-La suppression d’une notice demande le même droit d’écriture. Elle n’est possible que s’il ne reste aucun exemplaire et aucune réservation (`biblio_has_items`, `biblio_has_holds`). `force` ne lève pas ces refus.
+Supprimer une notice demande le même droit d’écriture. La suppression est refusée s’il reste un exemplaire ou une réservation. Forcer n’enlève pas ce refus.
 
-Export CSV : `GET /api/v1/biblios/export.csv`.
+Un export du catalogue au format tableur est proposé au personnel autorisé à lire le catalogue.
 
 ## Recherche
 
-Le personnel cherche dans `/biblios`. Meilisearch (index dont le nom par défaut est `items`) sert la recherche lorsqu’il est joignable. Sinon l’API retombe sur la recherche PostgreSQL. Une réindexation complète est réservée à l’administrateur : `POST /api/v1/admin/reindex-search`, aussi proposé dans Paramètres, Serveur, onglet Catalogue.
+Le personnel cherche dans la liste du catalogue. Le moteur de recherche répond lorsqu’il est joignable. Sinon la recherche utilise la base. Une réindexation complète est réservée à l’administrateur : Paramètres, Serveur, onglet Catalogue.
 
 ## Z39.50
 
-`/z3950` interroge les serveurs enregistrés dans Paramètres. Le résultat peut être importé comme notice (`POST /api/v1/z3950/import`). Les réponses sont mises en cache Redis. La durée par défaut est `ELIDUNE_REDIS__Z3950_CACHE_TTL_SECONDS` = 604800 (7 jours).
+L’écran de recherche interroge les serveurs enregistrés dans Paramètres. Un résultat peut être importé comme notice. Les réponses sont mises en cache pendant sept jours par défaut.
 
-Chaque serveur a un hôte, un port, une base et un indicateur d’activation. Le formulaire est dans l’onglet « Serveurs Z39.50 ».
+Chaque serveur a une adresse, un port, une base et un interrupteur d’activation. Le formulaire est dans l’onglet « Serveurs Z39.50 », visible lorsque le module est actif.
 
 ## Import MARC
 
-`/import-iso` envoie un fichier MARC. Les routes associées sont `POST /api/v1/biblios/load-marc` (lecture) et `POST /api/v1/biblios/import-marc-batch` (écriture). Les lots déjà chargés se relisent avec `GET /api/v1/biblios/list-marc-batches` et `GET /api/v1/biblios/marc-batch/{id}`.
+L’écran d’import envoie un fichier ISO 2709 ou MARCXML. Charger le fichier pour le relire demande le droit de lecture du catalogue. Enregistrer le lot dans le catalogue demande le droit d’écriture. Les lots déjà chargés peuvent être rouverts.
 
-Le traducteur MARC vit dans `server/src/marc/`. Le type de média est déduit de la position 6 du Leader.
+Le type de document est déduit de la notice MARC. Le mode dépôt, qui rattache les exemplaires à un lot reçu d’un prêteur, est décrit dans [Dépôts](/fr/documentation/deposits/).
 
 ## Fiche notice
 
-La fiche liste les exemplaires, leur disponibilité et la file de réservation de la notice (`GET /api/v1/biblios/{id}/holds`). L’ajout d’un exemplaire est décrit dans [Exemplaires](/fr/documentation/copies/).
+La fiche liste les exemplaires, leur disponibilité et la file de réservation de la notice. Ajouter un exemplaire est décrit dans [Exemplaires](/fr/documentation/copies/).

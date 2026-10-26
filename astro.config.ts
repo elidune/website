@@ -2,6 +2,7 @@ import { unified } from '@astrojs/markdown-remark';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import { remarkFrenchTypography } from './src/i18n/remark-french';
+import { remarkScreenshots } from './src/i18n/remark-screenshots';
 import { alternatesForUrl } from './src/i18n/routes';
 
 export default defineConfig({
@@ -17,7 +18,7 @@ export default defineConfig({
   },
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkFrenchTypography],
+      remarkPlugins: [remarkFrenchTypography, remarkScreenshots],
     }),
   },
   integrations: [
