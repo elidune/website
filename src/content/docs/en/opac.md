@@ -1,6 +1,6 @@
 ---
 title: OPAC
-description: Public catalogue without an account, availability, and the signed-in patron area.
+description: The public catalogue without an account, availability, and the signed-in patron area.
 navTitle: OPAC
 order: 39
 section: features
@@ -8,31 +8,24 @@ draft: false
 locale: en
 ---
 
-The public catalogue is on the sign-in page `/`, with no token. Search calls `GET /api/v1/opac/biblios` (free text, media type, pages of 20 biblios). The record calls `GET /api/v1/opac/biblios/{id}` and `GET /api/v1/opac/biblios/{id}/availability`.
+The public catalogue is on the sign-in page, with no account. Search accepts free text and a document type, and shows twenty records per page. A title’s screen shows availability.
 
-Filters on that screen: all media, book (`printedText`), DVD (`videoDvd`), magazine (`periodic`), comic (`comics`).
+The filters on this screen: all media, book, DVD, magazine, comic.
 
-Public availability shows the site (`sourceName`) and the number of waiting holds. It does not show the hold patron’s name, nor the internal status `toSearch` (grouped with “unavailable”). Covers go through `GET /api/v1/covers/isbn/{isbn}`, a public route.
+Public availability shows the site and the number of holds waiting. It gives neither the name of the patron who reserved, nor the “to search” detail (grouped with “unavailable”). Covers, when an ISBN is known, appear with no account.
 
-The same screen lists public events next to the catalogue. Hours and address come from `GET /api/v1/library-info`, also public.
+The same screen lists public events next to the catalogue. Opening hours and the address come from the library record, which is also public.
 
-These public routes are limited to 600 requests per minute per IP address, burst 120, by default (`ELIDUNE_SERVER__PUBLIC_PER_MINUTE`).
+![My loans page, light theme.](screen:opac-loans "The patron sees their loans and the due dates.")
 
-<figure>
-<picture>
-<source srcset="/screens/en/dark/opac-loans.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/en/light/opac-loans.webp" alt="My loans page, light theme." width="1440" height="900" />
-</picture>
-</figure>
-
-Screenshot: patron loans (`opac-loans`). A copy on loan exposes `expectedReturnDate` (a date, library time zone) while the due date has not passed. Lost, missing, weeding, and withdrawn copies are absent from that list.
+A copy on loan shows the expected return date, in the library’s time zone, while the due date has not passed. Lost, missing, weeding, and withdrawn copies are absent from that list.
 
 ## Once signed in
 
-`/catalog` repeats search for a signed-in account. The patron then opens:
+The signed-in catalogue repeats the search. The patron then opens:
 
-- `/my-loans` to renew a loan inside the allowed window;
-- `/my-holds` to follow or cancel their holds;
-- `/profile` for the password, language, history, and purchase suggestions.
+- My loans, to renew a loan inside the allowed window;
+- My holds, to follow or cancel their own;
+- My profile, for the password, the language, the history, and purchase suggestions.
 
-Placing a hold from the catalogue requires an account whose hold right is at least `own`. Staff do not use this OPAC for checkout: the desk is [Loans and returns](/en/docs/circulation/).
+Placing a hold from the catalogue requires an account that can reserve at least for itself. Staff do not use this screen for checkout: the desk is [Loans and returns](/en/docs/circulation/).

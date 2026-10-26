@@ -1,6 +1,6 @@
 ---
 title: Features
-description: "Guide map: catalogue, deposits, circulation, acquisitions, OPAC, statistics, sites, and languages."
+description: Map of the guides for staff and readers, from the catalogue to the desk.
 navTitle: Overview
 order: 30
 section: features
@@ -8,27 +8,27 @@ draft: false
 locale: en
 ---
 
-Each area has its own page. Paths are those of the React interface, served on the same origin as the `/api/v1` API. The version described is branch `dev` of [elidune/elidune](https://github.com/elidune/elidune) (commit `c169546`, single schema file `001_initial_schema.sql`).
+Each area has its own page. The procedures describe the screens, not the internal machinery. Technical detail is in the [developer documentation](/en/dev/).
 
 ## At the desk and on the shelves
 
-- [Catalogue](/en/docs/catalogue/): records, Z39.50, MARC import, search.
-- [Copies](/en/docs/copies/): barcodes, call numbers, circulation states, public and internal notes.
-- [Deposits](/en/docs/deposits/): lenders, batches, MARC import in deposit mode, return to the lender, losses.
-- [Inventory](/en/docs/inventory/): session, scan, close, consolidation.
-- [Patrons](/en/docs/patrons/): accounts, audience type derived from the date of birth, legal guardian, anonymisation.
-- [Loans and returns](/en/docs/circulation/): desk, forced checkout with a reason, exceptions, tablet desk.
-- [Holds](/en/docs/holds/): queue per record, pick list, pickup site.
-- [Reminders and fines](/en/docs/reminders-fines/): three email levels, amounts in cents, payment capped at the balance still due.
-- [Weeding](/en/docs/weeding/): candidate, withdrawal, destination.
+- [Catalogue](/en/docs/catalogue/): records, Z39.50 search, MARC import.
+- [Copies](/en/docs/copies/): barcodes, call numbers, availability, notes.
+- [Deposits](/en/docs/deposits/): documents received from another institution.
+- [Inventory](/en/docs/inventory/): session, scan, close, consolidate.
+- [Patrons](/en/docs/patrons/): accounts, audience type, legal guardian, anonymisation.
+- [Loans and returns](/en/docs/circulation/): the desk, forcing, exceptions, tablet.
+- [Holds](/en/docs/holds/): a queue per record, picking, pickup site.
+- [Reminders and fines](/en/docs/reminders-fines/): three email levels, payment capped at the balance.
+- [Weeding](/en/docs/weeding/): withdrawal candidate, leaving the collection.
 
 ## Around the catalogue
 
-- [Acquisitions and suggestions](/en/docs/acquisitions/): vendors, funds, orders, receiving, suggestions.
-- [OPAC](/en/docs/opac/): public catalogue without an account, and the patron area.
+- [Acquisitions and suggestions](/en/docs/acquisitions/): vendors, funds, orders, suggestions.
+- [OPAC](/en/docs/opac/): the public catalogue without an account, and the patron area.
 - [Events](/en/docs/events/): announcements, audiences, consent, unsubscribe.
-- [Statistics](/en/docs/statistics/): catalogue, patrons, loans, advanced query, visitor counts.
-- [Multiple sites](/en/docs/sites/): sites, pickup, transits.
-- [Languages](/en/docs/languages/): interface and message language.
+- [Statistics](/en/docs/statistics/): catalogue, patrons, loans, advanced query.
+- [Multiple sites](/en/docs/sites/): places, pickups, transits.
+- [Languages](/en/docs/languages/): interface, account language, message language.
 
-Optional modules (acquisitions, purchase suggestions, weeding, transits, deposits, events, inventory, Z39.50, MARC import, statistics, visitor counts) are switched in Settings, Modules, or with `ELIDUNE_FEATURES__PROFILE=essential`. The `essential` profile turns off acquisitions, purchase suggestions, weeding, transits, deposits, and visitor counts. See [Administration](/en/docs/administration/).
+Optional modules (acquisitions, purchase suggestions, weeding, transits, deposits, events, inventory, Z39.50, MARC import, statistics, visitor counts) are switched off in Settings, Modules. The “essential” profile turns off acquisitions, purchase suggestions, weeding, transits, deposits, and visitor counts, even when other boxes on the same screen are ticked. Events, inventory, Z39.50, MARC import, and statistics stay available. See [Administration](/en/docs/administration/).

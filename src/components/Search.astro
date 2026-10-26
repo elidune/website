@@ -4,9 +4,12 @@ import { t } from '../i18n/ui';
 
 interface Props {
   locale: Locale;
+  audience?: 'docs' | 'dev';
 }
 
-const { locale } = Astro.props;
+const { locale, audience = 'docs' } = Astro.props;
+const labelKey = audience === 'dev' ? 'search.label.dev' : 'search.label';
+const noscriptKey = audience === 'dev' ? 'search.noscript.dev' : 'search.noscript';
 const messages = {
   unavailable: t(locale, 'search.unavailable'),
   none: t(locale, 'search.none'),
@@ -16,7 +19,7 @@ const messages = {
 ---
 
 <div class="search" data-pagefind-ignore>
-  <label for="doc-search">{t(locale, 'search.label')}</label>
+  <label for="doc-search">{t(locale, labelKey)}</label>
   <input
     id="doc-search"
     type="search"
@@ -27,10 +30,10 @@ const messages = {
   />
   <p id="doc-search-status" class="search-status" aria-live="polite"></p>
   <ul id="doc-search-results" class="search-results"></ul>
-  <noscript><p>{t(locale, 'search.noscript')}</p></noscript>
+  <noscript><p>{t(locale, noscriptKey)}</p></noscript>
 </div>
 
-<script is:inline define:vars={{ locale, messages }}>
+<script is:inline define:vars={{ locale, audience, messages }}>
   const input = document.getElementById('doc-search');
   const status = document.getElementById('doc-search-status');
   const list = document.getElementById('doc-search-results');
@@ -55,7 +58,7 @@ const messages = {
     }
     try {
       const pf = await ensure();
-      const search = await pf.search(query, { filters: { locale: [locale] } });
+      const search = await pf.search(query, { filters: { bundle: [`${locale}-${audience}`] } });
       const results = search.results ?? [];
       const count = new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-GB').format(results.length);
       const template = results.length === 1 ? messages.status : messages.statusPlural;

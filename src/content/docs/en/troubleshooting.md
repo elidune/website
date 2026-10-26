@@ -1,6 +1,6 @@
 ---
 title: Troubleshooting
-description: Busy ports, API health, quotas, SMTP, and search.
+description: Startup, sign-in, email sending, empty search, and restore.
 navTitle: Troubleshooting
 order: 61
 section: help
@@ -8,47 +8,38 @@ draft: false
 locale: en
 ---
 
-Compose commands run from the root of the software repository, with the file used at installation.
+Commands and setting names are in [Deployment](/en/dev/deployment/). This page describes what staff and the person installing can observe.
 
-## The container does not start
+## The software does not start
 
-```bash
-docker compose -f docker/docker-compose.all-in-one.yml ps
-docker compose -f docker/docker-compose.all-in-one.yml logs --tail=200 elidune-all-in-one
-```
+Look at the state of the services and the last lines of the log. The commands are in deployment.
 
-On the split stack, the API service is named `elidnune-server`:
+**Settings not found.** Start the stack from the folder that contains the environment file, or name that file explicitly.
 
-```bash
-docker compose -f docker/docker-compose.yml logs --tail=200 elidnune-server
-```
+**Port already taken.** Change the published port, stop the stack, then start it again. The ports inside the all-in-one image do not change.
 
-HTTP check: `GET /api/v1/health`. The body reports a healthy state, a required first setup, or an unreachable database.
+**Image refused.** Sign in to the registry before downloading the image. The account used must be allowed to read it.
 
-**Variables not found.** Run `docker compose` in the directory that contains `.env`, or pass `--env-file`.
+**Empty line.** A variable written with no value can make configuration unreadable. Delete the line.
 
-**Port already in use.** Change `API_PORT`, `GUI_PORT`, `POSTGRES_PORT`, `REDIS_PORT`, or `MEILI_PORT`, then `down` and `up -d`. Ports inside the all-in-one image do not change (API 8080, UI 80, PostgreSQL 5432).
+**Search refuses its key.** In production mode, the key is at least 16 characters. Replace it, then restart, so the search engine follows.
 
-**GHCR image refused.** `docker login ghcr.io`. The image must be readable by the account in use.
+The health indicator distinguishes a healthy service, a first setup that is still required, and a database that cannot be reached. Its address is in deployment.
 
-**Empty string.** A line `SOME_VAR=` can make configuration parsing fail. Remove the line.
+## Sign-in
 
-**Meilisearch rejects the key.** In production mode the key is at least 16 characters. Replace `ELIDUNE_MEILISEARCH__API_KEY` and restart so that `MEILI_MASTER_KEY` follows.
+Too many attempts from the same address slow sign-in for a minute. This is not a wrong password. Behind a web server that gathers every desk onto one address, widen the quota or declare that server as a trusted intermediary, so each desk is counted apart. The detail is in [Authentication](/en/dev/authentication/).
 
-## Sign-in and quotas
-
-A 429 response with `code` equal to `rate_limited` and a `Retry-After` header comes from the quota, not from a wrong password. Default: 30 authentication requests per minute per IP. Behind a reverse proxy, if every desk shares one address, raise `ELIDUNE_SERVER__AUTH_IP_PER_MINUTE` or list the proxy in `ELIDUNE_SERVER__TRUSTED_PROXIES` so the API reads `X-Forwarded-For`.
-
-The per-login block (5 failures / 15 minutes) is cleared with `DELETE /api/v1/auth/rate-limit/{login}` by staff who have write access on users.
+The block per login (five failures in fifteen minutes) is cleared from the patron record, by a staff member who can edit patrons.
 
 ## Email
 
-No password-reset message: check `ELIDUNE_SERVER__PUBLIC_BASE_URL`, the SMTP host, the sender, and that the email section is overridable if the values come from the UI. The test is `POST /api/v1/admin/config/email/test`.
+No reset message: check the library’s public address, the sending host, the sender, and that the email section can be edited from the interface if the values come from the screen. The test send is reserved for the administrator, in the server settings.
 
 ## Empty search after an import
 
-Meilisearch indexes apart from PostgreSQL. After a large import or an SQL restore, run reindex (Settings, Server, Catalog). If Meilisearch is stopped, the API searches PostgreSQL.
+The search index is separate from the database. After a large import or a restore, run reindexing (Settings, Server, Catalog). If the search engine is stopped, search uses the database.
 
-## SQL restore
+## Restore
 
-The dump is `pg_dump --clean` SQL. Restoring it overwrites the database. Upload limit: 512 MiB. `pg_dump` must be installed in the image (the repository Dockerfiles add the PostgreSQL client). If connections stay open after the restore, restart the API container.
+Restoring a backup replaces the whole database. The upload size is limited. Plan a closure. If connections stay open after the restore, restart the server.

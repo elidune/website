@@ -1,6 +1,6 @@
 ---
 title: Languages
-description: Interface language, account language, and record language.
+description: Interface language, account language, record language, and message language.
 navTitle: Languages
 order: 42
 section: features
@@ -8,30 +8,28 @@ draft: false
 locale: en
 ---
 
-Two language families coexist. They are not set in the same place.
+Two families of languages coexist. They are not set in the same place.
 
 ## Interface
 
-The React UI is translated into English, French, German, and Spanish (`ui/src/locales/{en,fr,de,es}/translation.json`). The four files carry the same keys.
+The interface is translated into English, French, German, and Spanish. The four languages carry the same labels.
 
-Without a session, the language follows the browser. With a session, it follows the language stored on the account, then the remembered choice. The selector is in the application bar (light, dark, or system is a separate setting, not a language).
+Without a session, the language follows the browser. With a session, it follows the language saved on the account, then the remembered choice. The selector is in the application bar. Light, dark, or system is a separate setting, not a language.
 
-During first setup, the administrator account chooses among these four languages. The profile (`/profile`) changes it later. The server stores a long name (`french`, `english`, `german`, `spanish`), not the short code.
+At first setup, the administrator account chooses among these four languages. The profile changes it afterwards.
 
 ## Records and accounts
 
-The language of a biblio or a user uses the server list: `unknown`, `french`, `english`, `german`, `spanish`, `italian`, `portuguese`, `japanese`, `chinese`, `russian`, `arabic`, `dutch`, `swedish`, `norwegian`, `danish`, `finnish`, `polish`, `czech`, `hungarian`, `romanian`, `turkish`, `korean`, `latin`, `greek`, `croatian`, `hindi`, `hebrew`, `persian`, `catalan`, `thai`, `vietnamese`, `indonesian`, `malay`.
+The language of a record or a patron uses a longer list: unknown, French, English, German, Spanish, Italian, Portuguese, Japanese, Chinese, Russian, Arabic, Dutch, Swedish, Norwegian, Danish, Finnish, Polish, Czech, Hungarian, Romanian, Turkish, Korean, Latin, Greek, Croatian, Hindi, Hebrew, Persian, Catalan, Thai, Vietnamese, Indonesian, Malay.
 
-Only the four spoken languages above have a translated interface. The others remain record values.
+Only the first four spoken languages have a translated interface. The others stay as values on the record.
 
 ## Email templates
 
-`SUPPORTED_LANGUAGES` accepts `english`, `french`, `german`, and `spanish`. The Email templates tab edits French and English only.
+The Email templates tab edits only French and English. The language shown in the interface does not, by itself, choose the language of a message.
 
-Two chains coexist in `server/src/email_templates.rs`. Neither reads the language shown in the interface.
+**Notices to the patron**: reminders, hold ready, password reset. Order: the account language when it is French, English, German, or Spanish, then the library language, then French, then English. Italian, “unknown”, and a missing value are skipped. These templates are shipped in the four languages.
 
-**Patron notices** (`notice_language_order`): reminders, hold ready (`hold_ready`), password reset. Order: the account language when it is French, English, German, or Spanish, then the library language, then French, then English. Italian, `unknown`, and a missing value are skipped. Shipped files for these templates exist in all four languages.
+**Other messages**: second-factor code, recovery code, event announcement, loan closed by an inventory. French then English, or English then French. Any other language, including German and Spanish, starts with French. These templates are shipped only in French and English.
 
-**Other messages** (`language_chain`): second-factor code, recovery code, event announcement, loan closed by inventory. French then English, or English then French. Any other language, including German and Spanish, starts with French. Those templates ship only as `.french.json` and `.english.json`.
-
-For each language, a row already stored in the database is tried first, then the file `{id}.{language}.json`. The column `users.language` is `VARCHAR(32) DEFAULT 'french'` and stays nullable.
+For each language, a text already saved in settings is tried first, then the text shipped with the software. The language of a new account is French, and it can stay empty.

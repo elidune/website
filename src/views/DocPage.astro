@@ -58,7 +58,7 @@ const editUrl = editDocUrl(locale, slug, current.translated);
         <Search locale={locale} />
         {current.entry.data.draft && <p class="banner" role="status">{t(locale, 'docs.draft')}</p>}
         {!current.translated && <p class="banner" role="status">{t(locale, 'docs.untranslated')}</p>}
-        <article class="prose" data-pagefind-body data-pagefind-filter={`locale:${locale}`} data-pagefind-meta={`title:${current.entry.data.title.replaceAll('"', '')}`}>
+        <article class="prose" data-pagefind-body data-pagefind-filter={`bundle:${locale}-docs`} data-pagefind-meta={`title:${current.entry.data.title.replaceAll('"', '')}`}>
           <h1>{current.entry.data.title}</h1>
           <Content />
         </article>

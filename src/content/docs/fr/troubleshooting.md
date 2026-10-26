@@ -1,6 +1,6 @@
 ---
 title: Dépannage
-description: Ports occupés, santé de l’API, quotas, SMTP et recherche.
+description: Démarrage, connexion, envoi d’e-mails, recherche vide et restauration.
 navTitle: Dépannage
 order: 61
 section: help
@@ -8,47 +8,38 @@ draft: false
 locale: fr
 ---
 
-Les commandes Compose se lancent depuis la racine du dépôt logiciel, avec le fichier utilisé à l’installation.
+Les commandes et les noms de réglages sont dans le [déploiement](/fr/dev/deployment/). Cette page décrit ce que le personnel et la personne qui installe peuvent constater.
 
-## Le conteneur ne démarre pas
+## Le logiciel ne démarre pas
 
-```bash
-docker compose -f docker/docker-compose.all-in-one.yml ps
-docker compose -f docker/docker-compose.all-in-one.yml logs --tail=200 elidune-all-in-one
-```
+Regarder l’état des services et les dernières lignes du journal. Les commandes sont dans le déploiement.
 
-Pour la pile séparée, le service d’API s’appelle `elidnune-server` :
+**Réglages introuvables.** Lancer la pile depuis le dossier qui contient le fichier d’environnement, ou indiquer ce fichier explicitement.
 
-```bash
-docker compose -f docker/docker-compose.yml logs --tail=200 elidnune-server
-```
+**Port déjà pris.** Changer le port publié, arrêter la pile, puis la relancer. Les ports à l’intérieur de l’image tout-en-un ne changent pas.
 
-Contrôle HTTP : `GET /api/v1/health`. Le corps indique un état sain, une première configuration nécessaire, ou une base injoignable.
+**Image refusée.** Se connecter au registre avant de télécharger l’image. Le compte utilisé doit pouvoir la lire.
 
-**Variables introuvables.** Lancer `docker compose` dans le dossier qui contient `.env`, ou passer `--env-file`.
+**Ligne vide.** Une variable écrite sans valeur peut faire échouer la lecture de la configuration. Supprimer la ligne.
 
-**Port déjà pris.** Changer `API_PORT`, `GUI_PORT`, `POSTGRES_PORT`, `REDIS_PORT` ou `MEILI_PORT`, puis `down` et `up -d`. Les ports à l’intérieur de l’image tout-en-un ne changent pas (API 8080, interface 80, PostgreSQL 5432).
+**Recherche qui refuse sa clé.** En mode de production, la clé compte au moins 16 caractères. La remplacer, puis redémarrer, pour que le moteur de recherche suive.
 
-**Image GHCR refusée.** `docker login ghcr.io`. L’image doit être lisible pour le compte utilisé.
+L’indicateur de santé distingue un service sain, une première configuration encore nécessaire, et une base injoignable. Son adresse est dans le déploiement.
 
-**Chaîne vide.** Une ligne `QUELQUE_CHOSE=` peut faire échouer la lecture de la configuration. Supprimer la ligne.
+## Connexion
 
-**Meilisearch refuse la clé.** En mode production la clé fait au moins 16 caractères. Remplacer `ELIDUNE_MEILISEARCH__API_KEY` et redémarrer pour que `MEILI_MASTER_KEY` suive.
+Trop de tentatives depuis la même adresse ralentissent la connexion pendant une minute. Ce n’est pas un mot de passe faux. Derrière un serveur web qui regroupe tous les guichets sur une seule adresse, élargir le quota ou déclarer ce serveur comme intermédiaire de confiance, afin que chaque guichet soit compté à part. Le détail est dans l’[authentification](/fr/dev/authentication/).
 
-## Connexion et quotas
-
-Une réponse 429 avec `code` égal à `rate_limited` et un en-tête `Retry-After` vient du quota, pas d’un mot de passe faux. Défaut : 30 requêtes d’authentification par minute et par IP. Derrière un reverse proxy, si tous les guichets partagent la même adresse, élargir `ELIDUNE_SERVER__AUTH_IP_PER_MINUTE` ou déclarer le proxy dans `ELIDUNE_SERVER__TRUSTED_PROXIES` pour que l’API lise `X-Forwarded-For`.
-
-Le blocage par identifiant (5 échecs / 15 minutes) se lève avec `DELETE /api/v1/auth/rate-limit/{login}` par un personnel qui a l’écriture sur les lecteurs.
+Le blocage par identifiant (cinq échecs en quinze minutes) se lève depuis la fiche lecteur, par un membre du personnel qui peut modifier les lecteurs.
 
 ## E-mail
 
-Pas de message de réinitialisation : vérifier `ELIDUNE_SERVER__PUBLIC_BASE_URL`, l’hôte SMTP, l’expéditeur, et que la section e-mail est surchargeable si les valeurs viennent de l’interface. L’essai est `POST /api/v1/admin/config/email/test`.
+Pas de message de réinitialisation : vérifier l’adresse publique de la bibliothèque, l’hôte d’envoi, l’expéditeur, et que la section e-mail peut être modifiée depuis l’interface si les valeurs viennent de l’écran. L’essai d’envoi est réservé à l’administrateur, dans les paramètres du serveur.
 
-## Recherche vide après import
+## Recherche vide après un import
 
-Meilisearch indexe à part de PostgreSQL. Après un import important ou une restauration SQL, lancer la réindexation (Paramètres, Serveur, Catalogue). Si Meilisearch est arrêté, l’API cherche dans PostgreSQL.
+L’index de recherche est distinct de la base. Après un import important ou une restauration, lancer la réindexation (Paramètres, Serveur, Catalogue). Si le moteur de recherche est arrêté, la recherche utilise la base.
 
-## Restauration SQL
+## Restauration
 
-Le dump est du SQL `pg_dump --clean`. Le restaurer écrase la base. Limite d’envoi : 512 Mio. `pg_dump` doit être installé dans l’image (les Dockerfiles du dépôt ajoutent le client PostgreSQL). Si des connexions restent ouvertes après la restauration, redémarrer le conteneur de l’API.
+Restaurer une sauvegarde remplace toute la base. La taille envoyée est limitée. Prévoir une fermeture. Si des connexions restent ouvertes après la restauration, redémarrer le serveur.

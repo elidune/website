@@ -1,6 +1,6 @@
 ---
 title: Statistiques
-description: Écrans catalogue, lecteurs et prêts, et requête avancée.
+description: Écrans catalogue, lecteurs et prêts, requête avancée et compteurs de fréquentation.
 navTitle: Statistiques
 order: 40
 section: features
@@ -8,29 +8,27 @@ draft: false
 locale: fr
 ---
 
-`/stats` suit le module `stats` et le catalogue interne. Quatre onglets : catalogue, lecteurs, évolution des prêts, requête avancée. `GET /api/v1/stats` exige le droit de lecture sur les exemplaires. La requête avancée (`GET /api/v1/stats/schema`, `POST /api/v1/stats/query`) est réservée à un compte `librarian` ou `admin`.
+L’écran des statistiques suit le module correspondant et le droit de lire le catalogue. Quatre onglets : catalogue, lecteurs, évolution des prêts, requête avancée. La requête avancée est réservée à un bibliothécaire ou à un administrateur.
 
-Les compteurs de fréquentation (`visitor_counts`) ont une API `GET` et `POST /api/v1/visitor-counts`, avec le droit de lecture des paramètres, et un interrupteur dans Modules. L’interface ne leur consacre pas d’écran.
+Les compteurs de fréquentation ont un interrupteur dans Modules. L’interface ne leur consacre pas d’écran. Le détail technique est dans la [référence d’API](/fr/dev/api/).
 
 ## Catalogue, lecteurs, prêts
 
-L’onglet catalogue interroge `GET /api/v1/stats/catalog` et peut ventiler par année, par site (réponse `bySource`, libellé `siteName`) et par type de média ou de public.
+L’onglet catalogue peut ventiler par année, par site et par type de document ou de public.
 
-L’onglet lecteurs interroge `GET /api/v1/stats/users` (classements, agrégats, année). L’onglet prêts interroge `GET /api/v1/stats/loans`. Un compte qui n’est pas administrateur est limité à ses propres lignes sur les statistiques de prêts. L’administrateur voit l’ensemble, ou filtre par lecteur.
-
-`GET /api/v1/stats` exige le droit de lecture sur les documents.
+L’onglet lecteurs montre des classements et des totaux, par année. L’onglet prêts montre l’évolution des prêts. Un compte qui n’est pas administrateur est limité à ses propres lignes sur les statistiques de prêts. L’administrateur voit l’ensemble, ou filtre par lecteur.
 
 ## Requête avancée
 
-L’onglet avancé envoie `POST /api/v1/stats/query`. Le corps est en camelCase.
+L’onglet avancé combine des conditions.
 
-- `filters` : liste de conditions combinées par ET.
-- `filterGroups` : tableaux combinés par OU, chaque tableau interne par ET. Au plus 16 groupes, 32 filtres par groupe, 128 clauses au total.
-- `unionWith` : aujourd’hui, `loans` avec `loans_archives` seulement. Le champ calculé `loans.union_source` ne s’utilise que dans ce cas.
-- Les champs marqués calculés dans `GET /api/v1/stats/schema` servent au choix des colonnes, aux regroupements et aux filtres. Ils ne servent pas d’agrégat ni de découpage temporel.
+- Les conditions d’une liste se combinent toutes ensemble (et).
+- Des groupes de conditions se combinent entre eux par « ou ». À l’intérieur d’un groupe, c’est encore « et ». Au plus 16 groupes, 32 conditions par groupe, 128 conditions au total.
+- Croiser les prêts en cours et les prêts archivés n’est possible que pour ces deux ensembles.
+- Les champs calculés servent au choix des colonnes, aux regroupements et aux filtres. Ils ne servent pas de total ni de découpage dans le temps.
 
-Exemples de champs calculés sur `users` : `age_band` (`0-17`, `18-29`, `30-49`, `50-64`, `65+`), `age_band_3` (`0-14`, `15-64`, `65+`), `sex_label`. La colonne `sex` stocke `m`, `f`, ou null.
+Exemples de champs calculés sur les lecteurs : une tranche d’âge fine (0-17, 18-29, 30-49, 50-64, 65 et plus), une tranche large (0-14, 15-64, 65 et plus), et le libellé du sexe. Le sexe enregistré est masculin, féminin, ou non renseigné.
 
-Après une [anonymisation](/fr/documentation/administration/), les comptes de prêts actifs ne suivent plus la personne. Les archives gardent ces dimensions (`age_band`, `loan_year`, type de public, ville, type de compte), pas l’identité.
+Après une [anonymisation](/fr/documentation/administration/), les prêts encore ouverts ne suivent plus la personne. Les archives gardent la tranche d’âge, l’année du prêt, le type de public, la ville et le type de compte, pas l’identité.
 
-Le guide du dépôt `docs/README-stats-frontend.md` décrit le corps de requête en détail. Cette page ne le remplace pas.
+Le guide technique du dépôt logiciel décrit le corps de la requête. Cette page ne le remplace pas. Voir la [référence d’API](/fr/dev/api/).

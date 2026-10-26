@@ -1,6 +1,6 @@
 ---
 title: Holds
-description: Title-level hold queue, shelf pick, pickup, and expiry.
+description: A hold queue per record, shelf picking, pickup, and expiry.
 navTitle: Holds
 order: 35
 section: features
@@ -8,58 +8,51 @@ draft: false
 locale: en
 ---
 
-There is one kind of hold. The queue belongs to the **biblio**. A concrete item is chosen later. Moving it to another site is a transit, not a second hold type.
+There is only one kind of hold. The queue belongs to the **record**. A precise copy is chosen only afterwards. Moving a copy to another site is a transit, not a second kind of hold.
 
-<figure>
-<picture>
-<source srcset="/screens/en/dark/holds.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/en/light/holds.webp" alt="Holds list, light theme." width="1440" height="900" />
-</picture>
-</figure>
-
-Screenshot: holds (`holds`).
+![Holds list, light theme.](screen:holds "The list shows the state of each hold and the pickup.")
 
 ## Place a hold
 
-`POST /api/v1/holds` accepts:
+Two gestures land in the same queue:
 
-- `biblioId`: a title hold (OPAC or desk);
-- `itemId`: staff pin a specific item.
+- reserve a title, from the patron area or the desk;
+- pin a copy, a gesture reserved for staff.
 
-Both create the same row, on the same biblio. A patron whose `holds_rights` is `own` can hold only for themselves. Staff (`write`) can name another user. `read` alone cannot create a hold.
+A patron whose hold right is limited to themselves can reserve only for their own account. Staff allowed to edit holds can name another patron. Read-only access does not create a hold.
 
-One active hold (`pending`, `to_pick`, or `ready`) per patron per biblio. Each active hold counts as one toward `maxActiveHolds` (default 20, editable, with an optional public-type override).
+One active hold (waiting, to pick, or ready) per patron and per record. Each active hold counts as one toward the ceiling (20 by default, adjustable, with a possible exception on the audience type).
 
-The pickup site (`pickupSiteId`) is a site. See [Multiple sites](/en/docs/sites/). Two notes coexist: `patronNote` (visible to the patron) and `internalNote` (staff only). The `hold_ready` email includes the title, the barcode, the deadline, and the pickup site (`pickup_site`), in the library time zone. It does not substitute the copy’s home site for the pickup site.
+The pickup site is a site. See [Multiple sites](/en/docs/sites/). Two notes coexist: a note the patron can see, and a note internal to staff. The “hold ready” message repeats the title, the barcode, the deadline, and the pickup site, in the library’s time zone. It does not replace the pickup site with the site the copy leaves from.
 
-## Shelf pick
+## Picking
 
-As soon as a title hold finds a shelf item that is borrowable, not withdrawn, not on loan, not already held, and not in transit, it takes that item. An item already at the pickup site is preferred. The row becomes `to_pick` and the item stays on the shelf: the patron is not notified yet.
+As soon as a title hold finds a copy on the shelf, loanable, not withdrawn, not on loan, not already held, and not in transit, it takes that copy. A copy already at the pickup site is preferred. The row becomes “to pick” and the copy stays on the shelf: the patron is not notified yet.
 
-With no free item, the row stays `pending`, in arrival order.
+With no free copy, the row stays waiting, in arrival order.
 
-`/pick-list` (`GET /api/v1/holds/pick-list`) lists `to_pick` rows. A site filter limits the list to the item’s current site. `pickDelayDays` (default 2, in the hold policy) flags overdue pick-list rows. It does not cancel the hold.
+The pick list shows the rows to pick. A site filter limits it to the copy’s current site. The pick delay (2 days by default, in the hold policy) flags late rows. It does not cancel the hold.
 
-“Not on shelf” (`POST /api/v1/holds/{id}/pick-not-found`) marks the item `toSearch` and reassigns the hold, or returns it to `pending`. A later scan of that barcode clears `toSearch` and follows the normal return path.
+“Not on the shelf” marks the copy to search and reassigns the hold, or puts it back to waiting. A later scan of that barcode leaves the “to search” state and follows the normal return path.
 
-## When the item comes back
+## When the copy comes back
 
-On return, at the desk scan:
+At check-in, when the desk scans:
 
-- same site, or no pickup site: status `ready`, notification, pickup window;
-- other site: transit `requested`, the hold stays allocated. Receipt at the pickup site sets that same hold to `ready`.
+- same site, or no pickup site: the hold becomes ready, a message is sent, and the pickup delay starts;
+- another site: a transit is requested, and the hold stays assigned. Receiving at the pickup site moves that hold to “ready”.
 
-The default pickup window is `ELIDUNE_HOLDS__READY_EXPIRY_DAYS` = 7. After that the hold expires and the item is offered to the next one.
+The default pickup delay is 7 days. After that delay, the hold expires and the copy is offered to the next patron.
 
-Cancelling a hold whose item is in transit frees the place and opens a return transit to the origin.
+Cancelling a hold whose copy is in transit frees the place and opens a return transit toward the origin.
 
 ## Screens
 
 | Screen | Who |
 | --- | --- |
-| `/holds` | Staff: every queue |
-| `/my-holds` | Patron: their own, and cancellation of their own |
-| Biblio page | That biblio’s queue, arrival order |
-| `/transits` | Item transits |
+| Holds list | Staff: every queue |
+| My holds | The patron: their own, and cancelling their own |
+| Record screen | The record’s queue, in arrival order |
+| Transits | Copy movements |
 
-`DELETE /api/v1/holds/{id}` cancels. Staff with `write` cancel any row. A patron with `own` cancels only their own.
+Staff allowed to edit holds cancel any row. A patron cancels only their own.

@@ -8,102 +8,95 @@ draft: false
 locale: fr
 ---
 
-L’écran est `/loans`. Il s’ouvre avec le droit `loans_rights` en lecture. Prêter, rendre, prolonger et enregistrer une exception demandent l’écriture. Le menu s’intitule **Circulation**. Le droit de réservation ne suffit pas.
+L’écran s’ouvre avec le droit de consulter les prêts. Prêter, rendre, prolonger et enregistrer une exception demandent le droit de modifier les prêts. Le menu s’intitule **Circulation**. Le seul droit de réservation ne suffit pas.
 
 Quatre onglets : prêt, retour, retards, réclamations.
 
-<figure>
-<picture>
-<source srcset="/screens/fr/dark/desk.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/fr/light/desk.webp" alt="Guichet des emprunts, thème clair." width="1440" height="900" />
-</picture>
-</figure>
-
-Capture : guichet (`desk`).
+![Guichet des emprunts, thème clair.](screen:desk "Le guichet, avec le lecteur et les actions prolonger, retour, perdu ou abîmé.")
 
 ## Comptoir sur tablette
 
-En dessous de 1024 px de large, la taille de base du texte passe de 16 px à 14 px. En dessous de 1024 px de large ou de 768 px de haut, le menu latéral se replie en sections. En dessous de 768 px, la liste des prêts en cours s’affiche en cartes plutôt qu’en tableau. Les champs de code-barres du guichet acceptent une douchette et, via `BarcodeScanField`, la caméra de l’appareil.
+En dessous de 1024 pixels de large, le texte de base passe de 16 à 14 pixels. En dessous de 1024 pixels de large ou de 768 pixels de haut, le menu latéral se replie. En dessous de 768 pixels, la liste des prêts en cours s’affiche en cartes plutôt qu’en tableau. Les champs de code-barres acceptent une douchette et, sur l’appareil, la caméra.
 
 ## Prêter
 
-1. Choisir le lecteur (recherche ou code-barres de carte). Un scan de carte exact passe par `GET /api/v1/users/barcode/{code}` et affiche l’état du compte. La recherche par nom reste `GET /api/v1/users` et exige le droit de lecture sur les lecteurs.
-2. Scanner le code-barres de l’exemplaire. `POST /api/v1/loans` crée le prêt. Un seul prêt actif par exemplaire. Le corps peut porter `force` et `overrideReason`.
+1. Choisir le lecteur, par le nom ou par le code-barres de la carte. Un scan de carte exact montre l’état du compte. La recherche par nom demande le droit de lire les lecteurs.
+2. Scanner le code-barres de l’exemplaire. Un seul prêt actif par exemplaire.
 
-Le serveur calcule la date de retour à partir de la durée du type de média et du type de public (voir [Premiers pas](/fr/documentation/getting-started/)). Si `skip_closed_days` est vrai, la date tombe le prochain jour d’ouverture. Le prêt enregistre le site où il est fait (`loans.site_id`). Un exemplaire de dépôt peut plafonner cette date : voir [Dépôts](/fr/documentation/deposits/).
+Le logiciel calcule la date de retour à partir de la durée du type de document et du type de public (voir [Premiers pas](/fr/documentation/getting-started/)). Si le report des jours de fermeture est actif, la date tombe le prochain jour d’ouverture. Le prêt enregistre le site où il est fait. Un exemplaire de dépôt peut plafonner cette date : voir [Dépôts](/fr/documentation/deposits/).
 
 ### Refus et forçage
 
-Un refus de prêt est un HTTP 422 avec un `code`. Le guichet affiche le message correspondant.
+Un refus affiche son motif. Certains se forcent, d’autres non.
 
-| Code | Forçable | Motif obligatoire |
+| Situation | Forçable | Motif obligatoire |
 | --- | --- | --- |
-| `subscription_expired` | Oui, si `circulation_override_rights` est en écriture | Oui |
-| `item_held_for_other` | Idem | Oui |
-| `fines_over_threshold` | Oui, si `loans_rights` est en écriture | Non |
-| `max_loans`, `max_media_loans`, `item_not_loanable` | Oui pour tout appel qui envoie `force` | Non |
-| `card_lost`, `item_to_pick_for_other`, `deposit_return_due`, `deposit_item_returned_to_lender` | Non | — |
+| Abonnement expiré | Oui, avec le droit de dérogation | Oui |
+| Exemplaire réservé pour un autre lecteur | Oui, avec le droit de dérogation | Oui |
+| Amendes au-dessus du seuil | Oui, avec le droit de modifier les prêts | Non |
+| Plafond de prêts, plafond par support, exemplaire non empruntable | Oui, en forçant | Non |
+| Carte déclarée perdue, exemplaire déjà mis de côté pour quelqu’un d’autre, dépôt à rendre, exemplaire déjà renvoyé au prêteur | Non | — |
 
-Sans motif alors qu’il est exigé, la réponse est `override_reason_required`. Le bouton **Forcer le prêt** de l’interface n’apparaît que si le serveur marque le refus `forceable` et si le compte a l’écriture sur les prêts. Le type `librarian` livré n’a pas `circulation_override_rights` en écriture : seul le type `admin` livré peut forcer un abonnement expiré ou un exemplaire réservé à un autre lecteur, tant que ce droit n’est pas accordé dans Paramètres.
+Sans motif alors qu’il est exigé, le forçage est refusé. Le bouton **Forcer le prêt** n’apparaît que si le refus est forçable et si le compte peut modifier les prêts. Le bibliothécaire livré n’a pas le droit de dérogation : seul l’administrateur livré peut forcer un abonnement expiré ou un exemplaire réservé à un autre lecteur, tant que ce droit n’est pas accordé dans Paramètres.
 
-`item_held_for_other` propose aussi **Mettre de côté**, sans quitter le prêt. `item_to_pick_for_other` affiche que l’exemplaire est déjà mis de côté et ne se force pas.
+Lorsqu’un exemplaire est réservé pour quelqu’un d’autre, le guichet propose aussi **Mettre de côté**, sans quitter le prêt. Si l’exemplaire est déjà mis de côté, le prêt ne se force pas.
 
-Une carte déclarée perdue bloque le prêt et la prolongation (`card_lost`). Les retours et le paiement des amendes restent possibles. Le bandeau du guichet le dit. L’enregistrement de la perte est `POST /api/v1/users/{id}/card-lost` (écriture lecteurs ou écriture prêts). Le remplacement, qui n’utilise pas l’ancien numéro, est `POST /api/v1/users/{id}/replace-card` (écriture lecteurs). Ces deux actions n’ont pas de bouton dans l’interface de cette version.
+Une carte déclarée perdue bloque le prêt et la prolongation. Les retours et le paiement des amendes restent possibles. Le bandeau du guichet le dit. Déclarer la perte et remplacer la carte n’ont pas de bouton dans l’interface de cette version. Voir [Lecteurs](/fr/documentation/patrons/).
 
-Un prêt par lot existe : `POST /api/v1/loans/batch-create`.
+Un prêt de plusieurs exemplaires d’un coup existe pour les outils qui s’y connectent. L’écran du guichet scanne un exemplaire à la fois.
 
 ## États de l’exemplaire
 
-L’état de circulation est `items.circulation_status`, indépendant de la ligne de prêt.
+L’état de circulation est indépendant de la simple ligne de prêt.
 
-| Valeur | Code API | Effet |
-| --- | --- | --- |
-| 0 ou vide | `available` | Empruntable, si les autres règles le permettent |
-| 1 | `lost` | Perdu. Absent du catalogue public |
-| 2 | `damaged` | Abîmé. Non empruntable |
-| 3 | `claimedReturned` | Dit rendu |
-| 4 | `toSearch` | À rechercher. Encore listé, indisponible au public |
-| 5 | `missing` | Manquant. Absent du catalogue public |
+| État | Effet |
+| --- | --- |
+| Disponible | Empruntable, si les autres règles le permettent |
+| Perdu | Absent du catalogue public |
+| Abîmé | Non empruntable |
+| Déclaré rendu | Le lecteur dit l’avoir rendu |
+| À rechercher | Encore listé, indisponible au public |
+| Manquant | Absent du catalogue public |
 
-`PUT /api/v1/items/{id}` refuse un champ `circulationStatus`. Les changements passent par les actions du guichet.
+Ces états se changent par les actions du guichet, pas en éditant la fiche.
 
-Le motif de clôture d’un prêt archivé est `returned` (retour, retour abîmé, ou déclaration « dit rendu » retrouvée) ou `lost` (déclaré perdu, ou déclaration non retrouvée). Si l’exemplaire perdu est retrouvé plus tard, `foundAt` est renseigné. L’interface affiche « Perdu, retrouvé le {date} ».
+Un prêt archivé se ferme pour retour (retour, retour abîmé, ou déclaration « dit rendu » retrouvée) ou pour perte (déclaré perdu, ou déclaration non retrouvée). Si l’exemplaire perdu est accepté plus tard, l’écran affiche « Perdu, retrouvé le … ».
 
 ## Rendre
 
-Onglet Retour : le champ code-barres garde le focus pour une douchette. `POST /api/v1/loans/items/{code-barres}/return` clôt le prêt. Un code qui n’est pas en prêt peut répondre 200 avec une notice d’information (déjà rendu, perdu, à rechercher, etc.) au lieu d’un simple échec.
+Onglet Retour : le champ code-barres garde le focus pour une douchette. Scanner clôt le prêt. Un code qui n’est pas en prêt peut répondre par une information (déjà rendu, perdu, à rechercher, et ainsi de suite) plutôt que par un simple échec.
 
 Si une réservation de la même notice attend un exemplaire, le retour ne le remet pas simplement en rayon. Il le passe à « prêt à retirer », ou il ouvre un transit. Voir [Réservations](/fr/documentation/holds/).
 
-Retour par lot : `POST /api/v1/loans/batch-return`.
+Le retour de plusieurs codes d’un coup existe pour les outils connectés. Le guichet scanne un code à la fois.
 
 ## Prolonger
 
-Le lecteur prolonge son propre prêt dans `/my-loans`. Le personnel prolonge depuis le guichet. `POST /api/v1/loans/{id}/renew` accepte `force` et `overrideReason`.
+Le lecteur prolonge son propre prêt dans Mes emprunts. Le personnel prolonge depuis le guichet.
 
 Conditions lues dans les règles :
 
-- le nombre de prolongations restantes n’est pas épuisé (`max_renewals`, forçable avec l’écriture sur les prêts) ;
-- la date du jour est dans la fenêtre (`renew_window_days` avant l’échéance, défaut 7), ou le prêt est déjà en retard (`renewal_too_early`, forçable de la même façon) ;
-- l’ancrage `at_due_date` ou `now` fixe la nouvelle échéance ;
-- un compte bloqué (`account_blocked`) se force avec l’écriture sur les prêts ;
+- il reste des prolongations ; sinon le refus se force avec le droit de modifier les prêts ;
+- la date du jour est dans la fenêtre (sept jours avant l’échéance, par défaut), ou le prêt est déjà en retard ; trop tôt se force de la même façon ;
+- le point de départ choisi (échéance actuelle, ou jour de la prolongation) fixe la nouvelle échéance ;
+- un compte bloqué se force avec le droit de modifier les prêts ;
 - un abonnement expiré se force comme au prêt, avec le droit de dérogation et un motif.
 
-La date affichée après prolongation est celle renvoyée par le serveur.
+La date affichée après prolongation est celle calculée par le logiciel.
 
 ## Retards et exceptions
 
-L’onglet Retards liste `GET /api/v1/loans/overdue`. Chaque ligne peut être rendue ou prolongée.
+L’onglet Retards liste les prêts échus. Chaque ligne peut être rendue ou prolongée.
 
-Exceptions sur un prêt, avec le droit d’écriture :
+Exceptions, avec le droit de modifier les prêts :
 
-| Action | Route |
+| Action | Effet |
 | --- | --- |
-| Perdu | `POST /api/v1/loans/{id}/lost` |
-| Abîmé | `POST /api/v1/loans/{id}/damaged` (`return` clôt le prêt, `keep` le laisse ouvert) |
-| Déclaré rendu par le lecteur | `POST /api/v1/loans/{id}/claimed-returned` |
-| Clore cette déclaration | `POST /api/v1/loans/{id}/claims-returned/resolve` (`found` ou `notFound`) |
+| Perdu | Le prêt se ferme comme perdu. Une amende de remplacement peut suivre |
+| Abîmé | Rendre clôt le prêt. Garder le laisse ouvert, marqué abîmé |
+| Déclaré rendu par le lecteur | Ouvre une réclamation |
+| Clore cette déclaration | Retrouvé, ou non retrouvé |
 
-La liste des déclarations ouvertes est `GET /api/v1/loans/claims-returned`. La résolution et l’audit s’écrivent dans la même transaction.
+La liste des déclarations ouvertes est l’onglet Réclamations. La clôture et le journal s’écrivent ensemble.
 
-L’envoi manuel des relances de retard est réservé à l’administrateur : `POST /api/v1/loans/send-overdue-reminders`. Le planning automatique est dans [Relances et amendes](/fr/documentation/reminders-fines/).
+L’envoi manuel des relances de retard est réservé à l’administrateur. Le planning automatique est dans [Relances et amendes](/fr/documentation/reminders-fines/).

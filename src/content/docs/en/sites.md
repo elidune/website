@@ -1,6 +1,6 @@
 ---
 title: Multiple sites
-description: Holding sites, pickup site, and copy transits.
+description: Shelving sites, the pickup site, and copy transits.
 navTitle: Multiple sites
 order: 41
 section: features
@@ -8,60 +8,53 @@ draft: false
 locale: en
 ---
 
-A place (shelf area, branch, library in the network) is a row in the `sites` table. The API is `/api/v1/sites`.
+A place (a shelf area, a branch, a library in the network) is a site. The transit module can be turned off. Without it, movement between sites is not offered.
 
-<figure>
-<picture>
-<source srcset="/screens/en/dark/transits.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/en/light/transits.webp" alt="Transit list, light theme." width="1440" height="900" />
-</picture>
-</figure>
+![Transit list, light theme.](screen:transits "Copies moving toward a pickup site.")
 
-Screenshot: transits (`transits`).
+## Record the places
 
-## Register places
+Settings, Sites, administrator account:
 
-Settings, Sites tab (`/settings?tab=sites`), `admin` account:
-
-- create a site (name, and optionally the default site). On a fresh database, the first row after the `MyLibrary` site fails once (sequence not aligned; see [Installation](/en/docs/installation/));
+- create a site (a name, and optionally the default site);
 - rename;
-- archive (`POST /api/v1/sites/{id}/archive`);
-- merge at least two sites (`POST /api/v1/sites/merge`): copies are reassigned, the old sites are archived.
+- archive;
+- merge at least two sites: the copies are reassigned, and the old sites are archived.
 
-The copy keeps `siteId`: the place where it is shelved. The public catalogue shows that name. A loan also stores the desk site (`loans.site_id`). When that is empty, statistics and the calendar use the default site, not the copy’s site.
+On a current installation, the first site added after the original site saves on the first try. On an older database that has not received the number correction, that first save can fail once: save again. See [Installation](/en/docs/installation/).
+
+The copy keeps the place where it is shelved. The public catalogue shows that name. A loan also records the desk’s site. If it is empty, statistics and the calendar use the default site, not the copy’s site.
 
 ## Hold and pickup
 
-The hold stores `pickupSiteId`, the identifier of a site. When a copy is assigned:
+The hold carries a pickup site. When a copy is assigned:
 
-- item already at that site: status `ready`;
-- item elsewhere: a transit row toward that site. The hold becomes `ready` only on receipt.
+- copy already at that site: the hold becomes ready;
+- copy elsewhere: a transit leaves for that site. The hold becomes ready only when it is received.
 
-`/transits` follows these movements. Cancelling the hold during transit opens a return transit to the place of origin.
+The transit screen follows these movements. Cancelling the hold during the transit opens a return transit toward the place of origin.
 
-### Statuses and actions
+### States and actions
 
-`TransitStatus` is stored in lowercase. JSON and the interface use camelCase for `inTransit`.
+| State | Meaning |
+| --- | --- |
+| Requested | The move is planned, the copy has not left yet |
+| In transit | The copy is on the way. It is not loanable |
+| Received | The copy has arrived |
+| Cancelled | The move is abandoned |
 
-| Stored | Interface | Label |
-| --- | --- | --- |
-| `requested` | `requested` | Requested |
-| `in_transit` | `inTransit` | In transit |
-| `received` | `received` | Received |
-| `cancelled` | `cancelled` | Cancelled |
+The screen filters by in progress, requested, in transit, or all.
 
-The `/transits` screen filters by In progress, Requested, In transit, or All. An `in_transit` item cannot be loaned.
+| Action | Condition |
+| --- | --- |
+| Start the transit | The button appears for a waiting hold that has a pickup site and no active transit. It is hidden if the chosen copy is already at that site. A hold that is being picked is also accepted: it then goes back to waiting |
+| Ship immediately | A box at the start. The transit is created already on the way, without passing through “requested” |
+| Ship | The requested state becomes “in transit” |
+| Receive | The copy is on the way. It takes the destination site. If the transit is tied to a waiting hold, that hold becomes ready |
+| Cancel the transit | Requested or on the way. The linked hold remains. For a transit already on the way, the interface asks for a return: a new transit is opened from the destination toward the origin, with no hold attached |
 
-| Action | Label | Condition |
-| --- | --- | --- |
-| Start transit | “Start transit” | The button appears for a `pending` hold that has a pickup site and no active transit. It is hidden when the chosen copy is already at that site. The server also accepts a `to_pick` hold: it then sets that hold back to `pending` |
-| Ship immediately | “Ship immediately (in transit)” | Checkbox at start (`ship: true`). The transit is created directly as `in_transit`, skipping `requested` |
-| Ship | “Ship” | Stored status `requested`. The transit becomes `in_transit` |
-| Receive | “Receive” | Status `in_transit`. The copy takes the destination site. When the transit is linked to a `pending` hold, that hold becomes `ready` |
-| Cancel transit | “Cancel transit” | Status `requested` or `in_transit`. The linked hold stays. For a transit already `in_transit`, the UI sends `reverse: true`: the server opens a `requested` transit from the destination back to the origin, with no hold attached |
-
-The pick list filters by the item’s current site.
+The pick list filters by the copy’s current site.
 
 ## Shared rules
 
-Loan caps, public types, and fines belong to the installation, not to a per-site scale. A copy `in_transit` cannot be checked out. A `requested` transit also blocks checkout: `force` does not lift that block (`business_rule_violation`).
+Loan ceilings, audience types, and fines are those of the installation, not a scale per site. A copy in transit is not loanable. A transit that is only requested also blocks checkout. Forcing does not lift that block.

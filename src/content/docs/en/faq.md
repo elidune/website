@@ -1,6 +1,6 @@
 ---
 title: Help and frequently asked questions
-description: Frequent questions on installation, sign-in, loans, and data.
+description: Frequent questions about installation, sign-in, loans, and data.
 navTitle: Help and questions
 order: 60
 section: help
@@ -8,45 +8,45 @@ draft: false
 locale: en
 ---
 
-Startup failures are in [Troubleshooting](/en/docs/troubleshooting/). Bug reports go to the issues of [elidune/elidune](https://github.com/elidune/elidune/issues).
+Startup failures are in [Troubleshooting](/en/docs/troubleshooting/). A bug is reported in the software repository’s issues, the “GitHub” link on this site.
 
 ## Installation
 
-**Is an administrator required at first start?**  
-No. While the database has neither a user nor a saved setting, the UI opens `/first-setup`. No password is shipped.
+**Is an administrator required at the first launch?**
+No. While the database has neither an account nor saved settings, the interface opens the wizard. No password is shipped.
 
-**Which image?**  
-`elidune-all-in-one` for a single container. `elidune-server` and `elidune-ui` to split the API, the UI, PostgreSQL, Redis, and Meilisearch. Default ports differ. See [Installation](/en/docs/installation/).
+**Which installation to choose?**
+One image to keep everything together. Several services to separate the interface, the server, the database, the cache, and search. The default ports are not the same. See [Installation](/en/docs/installation/) and [Deployment](/en/dev/deployment/).
 
-**Where is the demo?**  
-The software README gives `https://elidune.b-612.fr/`. This presentation site also points at `https://elidune-demo.b-612.fr`.
+**Where to try without installing?**
+The Demo button in the header opens a demonstration instance, separate from this site.
 
 ## Sign-in
 
-**`/login` has no form.**  
-It redirects to `/`.
+**The sign-in form is not on a separate page.**
+It is on the home page, next to the public catalogue.
 
-**Forgotten password does nothing.**  
-Without `ELIDUNE_SERVER__PUBLIC_BASE_URL`, the server does not send the message. Past three requests per hour for the same login, the response stays a generic success and no message is sent.
+**Forgotten password does nothing.**
+Without the library’s public address, the message is not sent. Beyond three requests an hour for the same login, the answer stays a general success and no message is sent.
 
-**Too many attempts.**  
-Five failures in 15 minutes on the same login block further attempts. This is not a permanent account lock. Staff clear the block on the user record.
+**Too many attempts.**
+Five failures in fifteen minutes on the same login block the next attempts. This is not a permanent lock of the account. Staff clear the block on the patron record.
 
 ## Loans and holds
 
-**The loan button is not in the menu.**  
-`/loans` follows `loans_rights` (read to open the screen, write to check out). A patron renews in `/my-loans`.
+**The loan button is not in the menu.**
+The desk follows the loan right: read to open the screen, write to check out. A patron renews in My loans.
 
-**A hold does not notify immediately.**  
-While the item is still on the shelf (`to_pick`), the patron is not notified. The notification is sent when the status becomes `ready`.
+**A hold does not notify at once.**
+While the copy is still on the shelf, waiting to be picked, the patron is not notified. The message goes out when the hold is ready.
 
-**Renewal is refused before the due date.**  
-The default window is 7 days before the due date. Outside it, the server refuses, unless the loan is already overdue.
+**Renewal is refused before the due date.**
+The default window is seven days before the return date. Outside it, the software refuses, unless the loan is already overdue.
 
 ## Data
 
-**Does deleting a patron erase statistics?**  
-“Anonymize for stats” removes the identity and keeps non-identifying dimensions on loan archives. See [Administration](/en/docs/administration/).
+**Does deleting a patron erase the statistics?**
+The action “Anonymize for stats” removes the identity and keeps non-identifying dimensions on loan archives. See [Administration](/en/docs/administration/).
 
-**Are the screenshots on this site the software?**  
-Yes. They come from an instance started from the `dev` branch, with fictional patrons and public-domain titles. None shows a patron name on a slip, a label, or a batch report.
+**Are the screenshots on this site the software?**
+Yes. They come from an instance started from the development branch, with fictional patrons and public-domain titles. None shows a patron’s name on a slip, a label, or a batch report.

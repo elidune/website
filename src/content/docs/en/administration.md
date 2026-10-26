@@ -1,6 +1,6 @@
 ---
 title: Administration
-description: Settings, rights, SMTP, GDPR anonymisation, and the audit log.
+description: Settings, rights, email sending, anonymisation, and the audit log.
 navTitle: Administration
 order: 50
 section: admin
@@ -8,92 +8,75 @@ draft: false
 locale: en
 ---
 
-Settings live at `/settings`. An `admin` account sees every tab. A `librarian` account sees only Library.
+Settings open from the menu of the same name. An administrator sees every tab. A librarian sees only Library.
 
-<figure>
-<picture>
-<source srcset="/screens/en/dark/settings.webp" media="(prefers-color-scheme: dark)" />
-<img src="/screens/en/light/settings.webp" alt="Library settings, light theme." width="1440" height="900" />
-</picture>
-</figure>
-
-Screenshot: settings (`settings`).
+![Library settings, light theme.](screen:settings "The Library tab: name, address, and contact.")
 
 ## Tabs
 
 | Tab | Contents |
 | --- | --- |
 | Library | Name, address, country, time zone, contact, opening hours |
-| Loan rules | Durations, caps, renewal, holds, reminders, fines, unpaid threshold |
-| Public types | Audiences, ages, subscription, loan overrides |
+| Loan settings | Durations, ceilings, renewal, holds, reminders, fines, unpaid threshold |
+| Audience types | Audiences, ages, subscription, loan exceptions |
 | Account types | Rights per account type |
 | Email templates | Texts that are sent |
-| Sites | Holding and pickup places |
+| Sites | Places where copies are kept and picked up |
 | Z39.50 servers | Import targets, when the module is on |
-| Modules | Optional features, including the `essential` profile |
-| Server | Reminders, hold expiry, logs, audit retention, SMTP, reindex, SQL dump |
+| Modules | Optional features, including the essential profile |
+| Server | Reminders, hold expiry, logs, audit retention, email sending, reindex, database backup |
 | Audit | Log of sensitive operations |
 
-The Server tab has three sub-tabs: General, Catalog, Database. A section marked not overridable stays as in the configuration file. “Reset to file” deletes the database override (`DELETE /api/v1/admin/config/{section}`).
+The Server tab has three sub-tabs: General, Catalog, Database. A section marked as not editable from the interface stays as in the configuration file. “Back to the file” deletes the override saved in the database.
 
-Overridable sections in `sample.toml` include logging, email, reminders, audit, and holds (`overridable = true`).
+The sections the template allows to override include logging, email, reminders, audit, and holds.
 
 ## Roles and rights
 
-The account type (`guest`, `reader`, `group`, `librarian`, `admin`) carries levels. For documents, users, settings, and events: none, read, write. For loans: none, read, write. For holds: none, self (`own`), read, write.
+The account type carries levels. For documents, patrons, settings, and events: none, read, write. For loans and holds: none, self, read, write.
 
-Seeded set after migrations:
-
-| Type | Documents | Users | Loans | Holds | Settings |
+| Type | Documents | Patrons | Loans | Holds | Settings |
 | --- | --- | --- | --- | --- | --- |
-| `guest` | read | none | none | none | read |
-| `reader`, `group` | read | self | self (does not open the desk) | self | read |
-| `librarian` | write | write | write | write | read |
-| `admin` | write | write | write | write | write |
+| Guest | read | none | none | none | read |
+| Reader, group | read | self | self, without the desk | self | read |
+| Librarian | write | write | write | write | read |
+| Administrator | write | write | write | write | write |
 
-`own` on loans does not open `/loans`. It lets the patron see and renew their own loans. `own` on holds lets them create and cancel their own. Other letters live on the account type: `acquisitions_rights`, `weeding_rights`, `weeding_cancel_rights`, `items_archive_rights`, `circulation_override_rights`, `events_rights`. The shipped `librarian` type has write everywhere except settings (read) and circulation override (`n`). The shipped `admin` type has write, including that override. Custom types are created on the Account types tab. System types cannot be deleted.
+The “self” level on loans does not open the desk. It lets the patron see and renew their own loans. The “self” level on holds lets them create and cancel their own.
 
-The Modules tab exposes the flags from `GET /api/v1/library-info` (`enabledFeatures`). The file can set `profile = "essential"`, which turns off acquisitions, purchase suggestions, weeding, transits, deposits, and visitor counts, even when booleans in the same file say otherwise. Events, inventory, Z39.50, MARC import, and statistics stay on. A disabled module returns HTTP 403 `feature_disabled`. Visitor counts have an API (`/api/v1/visitor-counts`, settings read) and a module switch. The interface has no screen for them.
+Other rights exist on the account type: acquisitions, weeding, cancelling a weeding, archiving a copy, circulation exception, events. The shipped librarian has write everywhere except settings (read) and the circulation exception (none). The shipped administrator has write, including that exception. Custom types are created on the Account types tab. Types shipped with the software cannot be deleted.
 
-The Account types tab edits these letters. Changing a user’s type remains an administrator action.
+The Modules tab turns optional features on or off, including the essential profile. That profile turns off acquisitions, purchase suggestions, weeding, transits, deposits, and visitor counts, even when the matching boxes are ticked. Events, inventory, Z39.50, MARC import, and statistics stay on. A feature that is off answers with a refusal. Visitor counts have no screen, only the switch.
 
-Administration routes (`/api/v1/admin/config`, SMTP test, reindex, audit, maintenance) require an `admin` account.
+Changing a user’s type remains an administrator action.
 
-## Email and SMTP
+Server operations (configuration, a test send, reindex, audit, backup) require an administrator account.
 
-Variables, also editable on the Server tab when the email section is overridable:
+## Email
 
-| Variable | Compose default |
-| --- | --- |
-| `ELIDUNE_EMAIL__SMTP_HOST` | empty |
-| `ELIDUNE_EMAIL__SMTP_PORT` | 587 |
-| `ELIDUNE_EMAIL__SMTP_USERNAME` | empty |
-| `ELIDUNE_EMAIL__SMTP_PASSWORD` | empty |
-| `ELIDUNE_EMAIL__SMTP_FROM` | empty |
-| `ELIDUNE_EMAIL__SMTP_FROM_NAME` | empty in Compose, “Elidune” in `sample.toml` |
-| `ELIDUNE_EMAIL__SMTP_USE_TLS` | true |
+When the email section can be overridden, the Server tab records the host, the port (587 by default), the login, the password, the sender address, the sender name, and encryption. The password is not returned in clear text by the screen. A test send exists for the administrator.
 
-Do not write an empty string for an optional value: omit the variable. The SMTP password is not returned in clear text by the screen. A test send exists: `POST /api/v1/admin/config/email/test`.
+Do not save an empty value in place of an optional setting: leave the field aside.
 
-`ELIDUNE_SERVER__PUBLIC_BASE_URL` (no trailing slash) is the origin of links inside messages. When it is empty, password reset sends nothing. Event announcements point at `{origin}/events/unsubscribe?token=…`.
+The library’s public address, with no trailing slash, is the origin of links in messages. Empty, password reset sends nothing. Event announcements point to the unsubscribe page.
 
-Shipped templates: `overdue_reminder`, `overdue_second_reminder`, `overdue_formal_notice`, `hold_ready`, `password_reset`, `2fa_code`, `recovery_code`, `event_announcement`, `inventory_loan_closed`.
+Shipped templates: three overdue reminders, hold ready, forgotten password, second-factor code, recovery code, event announcement, loan closed by an inventory.
 
-## Anonymisation (GDPR)
+## Anonymisation
 
-The desk action is named “Anonymize for stats”. The API is still `DELETE /api/v1/users/{id}`. `force=true` returns active loans first, then erases.
+The desk action is named “Anonymize for stats”. If the patron still has active loans, the action can check them in first, then erase, when it is confirmed.
 
-The internal identifier is not rewritten. Status becomes `deleted`, tokens are revoked, and identity fields (login, password, name, email, address, phone, barcode, date of birth, notes, second factor) become null. Account type, public type, creation date, and subscription end date remain. Loan archives keep dimensions (age band at the loan date, year, city, public type, account type) and lose the link to the person. Active holds are deleted. Fines lose the user. Pending emails to that address are deleted. The audit log does not store the erased data.
+The internal identifier is not rewritten. The account moves to the deleted state, sessions are revoked, and the identity fields (login, password, name, email, address, phone, barcode, date of birth, notes, second factor) are cleared. The account type, the audience type, the creation date, and the subscription end date remain. Loan archives keep dimensions (age band at the loan date, year, town, audience type, account type) and lose the link to the person. Active holds are deleted. Fines lose the patron. Messages waiting for that address are deleted. The audit log does not store the erased data.
 
-The automatic job is `[privacy] auto_anonymize_years_after_expiry` (`ELIDUNE_PRIVACY__AUTO_ANONYMIZE_YEARS_AFTER_EXPIRY`). Default 0: job off. A typical value cited in the repository for a municipal library is 3, in years after `expiry_at`. The job runs at 04:00. It skips patrons who still have an active loan. Each anonymisation writes `user.deleted` with `trigger` equal to `retention_job`, and a counter event `system.privacy_auto_erasure`.
+The automatic pass, in years after the subscription end, is off by default (zero years). A value often kept for a municipal library is three years after the end date. The task runs at 04:00. It ignores patrons who still have an active loan. Each anonymisation is logged.
 
-Column-by-column detail is `docs/README-patron-erasure.md` in the software repository.
+The action is irreversible. The column-by-column detail is in the software repository’s technical documentation, recalled in the [data model](/en/dev/data-model/).
 
 ## Logs
 
 Two separate logs:
 
-- **Application.** `ELIDUNE_LOGGING__LEVEL` (`info` in Compose), format `pretty`, `plain`, or `json`, output `stdout`, `stderr`, `file`, or `syslog`. `RUST_LOG` additionally filters the Rust tracer (Compose default `elidune_server=info,tower_http=info`). For file output, the path and the rotation (`daily` by default) are required.
-- **Audit.** `GET /api/v1/audit` and export `GET /api/v1/audit/export`, administrator. Retention `ELIDUNE_AUDIT__RETENTION_DAYS` = 365. Older rows are deleted. The Audit tab in Settings reads them.
+- **Application.** Level, format, and output are set in the file or, when the section can be overridden, on the Server tab. This log is for diagnosis. It is not the audit log.
+- **Audit.** Readable by an administrator, with an export. The default retention is 365 days. Older rows are deleted. The Audit tab shows them.
 
-First setup writes `system.first_setup_completed` (library name, whether SMTP was provided), without the password.
+First setup writes an event when the wizard finishes (library name, whether email sending is present), without the password.

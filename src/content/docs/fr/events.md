@@ -8,22 +8,22 @@ draft: false
 locale: fr
 ---
 
-Le module `events` est activé par défaut. L’adresse unique est `/events`. Le même écran sert le public et le personnel : un compte dont le droit `events_rights` est en écriture crée, modifie et supprime. Le fichier `EventsPage.tsx` n’est pas branché sur le routeur. `/events/manage` redirige vers `/events`.
+Le module des événements est activé par défaut. Un seul écran sert le public et le personnel. Un compte autorisé à modifier les événements crée, modifie et supprime. L’adresse de gestion renvoie vers ce même écran.
 
 Le catalogue public, sur la page de connexion, liste aussi les événements publics à côté de la recherche.
 
 ## Audiences
 
-Un événement vise tous les types de public (`allAudiences`) ou une liste de noms de types de public (`event_audiences`). Le formulaire du personnel propose le basculement « toutes les audiences » et la liste des types.
+Un événement vise tous les types de public, ou une liste de types. Le formulaire du personnel propose le basculement « toutes les audiences » et la liste des types.
 
 ## Consentement
 
-L’envoi repose sur le consentement du compte (`eventsConsent`), modifié dans le profil. Un compte enfant suit le consentement du responsable légal. Le détail des phrases affichées est dans l’interface (`events.childNotice` et les clés voisines). Cette page ne recopie pas le corps des e-mails.
+L’envoi repose sur le consentement du compte, modifié dans le profil. Un compte enfant suit le consentement du responsable légal. Cette page ne recopie pas le corps des messages.
 
-Le modèle livré est `event_announcement`, en français et en anglais, sous `server/data/email_templates/`. L’onglet Modèles d’e-mails édite ces deux langues. L’envoi utilise `language_chain` : français ou anglais du compte, sinon français puis anglais. L’allemand et l’espagnol du compte retombent sur le français pour ce modèle. Voir [Langues](/fr/documentation/languages/).
+Le modèle livré existe en français et en anglais. L’onglet Modèles d’e-mails édite ces deux langues. L’envoi utilise le français ou l’anglais du compte, sinon le français puis l’anglais. L’allemand et l’espagnol du compte retombent sur le français pour ce message. Voir [Langues](/fr/documentation/languages/).
 
-Le lien de désinscription des messages pointe vers `{origine publique}/events/unsubscribe?token=…`. L’en-tête List-Unsubscribe utilise `{origine}/api/v1/events/unsubscribe?token=…`.
+Le lien de désinscription des messages ouvre une page publique. Le même jeton sert au clic unique proposé par la messagerie.
 
 ## Désinscription
 
-`/events/unsubscribe?token=` affiche la page publique. Elle envoie `POST /api/v1/events/unsubscribe`. Le même jeton sert au clic unique côté messagerie, sur l’URL d’API.
+La page publique, ouverte depuis le message, retire le consentement. Un simple aperçu du message par le logiciel de courrier ne retire pas le consentement : il faut confirmer.
